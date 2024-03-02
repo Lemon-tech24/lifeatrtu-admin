@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "regular-pop";
+  src: url("/regular.ttf");
+  font-display: block;
+}
+
+* {
+  font-family: "regular-pop";
+}
+
+.input::placeholder {
+  color: black;
+  opacity: 0.9;
+  text-align: center;
+}
