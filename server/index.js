@@ -15,19 +15,23 @@ const PORT = process.env.PORT || 3000;
 passport.use(
   new LocalStrategy(async function (username, password, cb) {
     try {
+      const admin = { id: "1", username: "admin", password: "carlhari" };
+
+      if (username === admin.username && password === admin.password) {
+        return cb(null, admin);
+      }
+
       const user = await prisma.account.findFirst({
         where: {
           username,
         },
       });
 
-      console.log("prisma ito", user);
-
-      if (!user && user.role !== "moderator") {
-        return cb(null, false, { message: "Invalid Username or Password" });
+      if (user && user.role === "moderator") {
+        return cb(null, user);
       }
 
-      return cb(null, user);
+      return cb(null, false, { message: "Invalid Username or Password" });
     } catch (err) {
       return cb(err);
     }
@@ -61,24 +65,31 @@ app.use(
 app.use(cors());
 app.use(express.json());
 app.use(passport.initialize());
+app.use(passport.session());
 
-app.post("/login", (req, res, next) => {
-  passport.authenticate("local", (err, user, info) => {
-    if (err) {
-      return next(err);
-    }
-    if (!user) {
-      console.error("Authentication failed:", info.message);
-      return res.status(401).json({ message: "Invalid username or password" });
-    }
-    req.logIn(user, (err) => {
-      if (err) {
-        return next(err);
-      }
-      console.log("Authentication successful:", user.username);
-      return res.json({ message: "Success", user });
-    });
-  })(req, res, next);
+app.post(
+  "/login",
+  passport.authenticate("local", {
+    successRedirect: "/home",
+    failureRedirect: "/",
+  })
+);
+
+app.get("/home", (req, res) => {
+  if (req.isAuthenticated) {
+    return console.log("YES your are");
+  }
+
+  return console.log("NO");
+});
+
+app.get("/check", (req, res) => {
+  res.json({ ok: req.isAuthenticated() });
+});
+
+app.delete("/logout", (req, res) => {
+  req.logOut();
+  res.redirect("/");
 });
 
 app.listen(PORT, () => {

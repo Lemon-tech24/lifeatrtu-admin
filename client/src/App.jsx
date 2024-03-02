@@ -1,49 +1,49 @@
-/* eslint-disable no-unused-vars */
-import { useState } from "react";
+import Home from "./components/Home";
+import { useEffect, useState } from "react";
+import LoginForm from "./components/LoginForm";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import axios from "axios";
 
 function App() {
-  const [count, setCount] = useState(0);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-
-    try {
-      const response = await axios.post("http://localhost:3000/login", {
-        username,
-        password,
-      });
-      console.log(response.data);
-    } catch (error) {
-      setError("Invalid username or password");
-    }
-  };
   return (
-    <>
-      <form onSubmit={handleLogin}>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          className="text-2xl"
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Login</button>
-      </form>
-      {error && <p>{error}</p>}
-    </>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LoginForm />} />
+        <Route path="/home" element={<AuthenticatedRoute />} />
+      </Routes>
+    </BrowserRouter>
   );
+}
+function AuthenticatedRoute() {
+  const [auth, setAuth] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/check");
+
+        const data = response.data;
+
+        if (data.ok) {
+          return setAuth(true);
+        }
+
+        return setAuth(false);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    checkAuth();
+
+    return () => setAuth(false);
+  }, []);
+
+  if (auth) {
+    return <Home />;
+  } else {
+    return <Navigate to="/" />;
+  }
 }
 
 export default App;
