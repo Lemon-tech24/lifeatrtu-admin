@@ -4,6 +4,7 @@ import "./globals.css";
 import AuthProvider from "./lib/AuthProvider";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/lib/auth";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   icons: "",
@@ -21,6 +22,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body>
+        <Toaster />
         <AuthProvider session={session}>{children}</AuthProvider>
       </body>
     </html>

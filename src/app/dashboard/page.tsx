@@ -1,7 +1,7 @@
 "use client";
 
 import { signOut } from "next-auth/react";
-import React, { useEffect } from "react";
+import React from "react";
 import { useSession } from "next-auth/react";
 import { redirect, useRouter } from "next/navigation";
 import DashboardHome from "../components/DashboardHome";
@@ -23,7 +23,9 @@ const Page = () => {
   ];
 
   return status === "loading" ? (
-    "LOADING"
+    <div className="flex items-center justify-center w-full min-h-screen gap-4">
+      <span className="loading loading-spinner w-20 "></span>Verifying User
+    </div>
   ) : (
     <div className="flex">
       <div className="relative w-1/5 bg-slate-300 min-h-screen">
@@ -39,7 +41,7 @@ const Page = () => {
               backgroundImage: "url('/textbg.png')",
               backgroundSize: "cover",
             }}
-            className="font-extrabold text-center bg-clip-text text-transparent text-9xl"
+            className="font-extrabold text-center bg-clip-text text-transparent text-8xl"
           >
             RTU
           </div>
@@ -58,10 +60,16 @@ const Page = () => {
           })}
         </div>
 
-        <div className="absolute inset-x-0 bottom-4 flex items-center justify-center">
+        <div className="absolute inset-x-0 bottom-4 flex items-center justify-center flex-col gap-2">
           <button
             type="button"
-            className="bg-red-500 px-4 rounded-xl text-xl"
+            className="bg-gray-400 w-32 px-5 rounded-xl text-xl"
+          >
+            Settings
+          </button>
+          <button
+            type="button"
+            className="bg-red-500 w-32 px-5 rounded-xl text-xl"
             onClick={() =>
               signOut({ redirect: false }).then(() => {
                 router.push("/");

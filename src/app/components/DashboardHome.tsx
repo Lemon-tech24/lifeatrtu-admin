@@ -23,29 +23,21 @@ const data = [
     name: "Page A",
     uv: 15,
     pv: 9,
-    av: 5,
-    amt: 15,
   },
   {
     name: "Page B",
     uv: 9,
     pv: 9,
-    av: 5,
-    amt: 10,
   },
   {
     name: "Page C",
     uv: 2,
     pv: 9,
-    av: 3,
-    amt: 10,
   },
   {
     name: "Page D",
     uv: 2,
     pv: 3,
-    av: 7,
-    amt: 10,
   },
 ];
 const getPath = (x: any, y: any, width: any, height: any) => {
@@ -144,17 +136,6 @@ const DashboardHome = () => {
             >
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={"red"} />
-              ))}
-            </Bar>
-
-            <Bar
-              dataKey="av"
-              fill="gold"
-              shape={<TriangleBar />}
-              label={{ position: "top" }}
-            >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={"gold"} />
               ))}
             </Bar>
           </BarChart>
