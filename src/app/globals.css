@@ -9,6 +9,15 @@
 }
 
 * {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+*:focus {
+  outline: none !important;
+}
+
+* {
   font-family: "regular-pop";
 }
 
@@ -16,4 +25,25 @@
   color: black;
   opacity: 0.9;
   text-align: center;
+}
+
+::-webkit-scrollbar {
+  width: 2px;
+  height: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

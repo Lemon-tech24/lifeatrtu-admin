@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -18,4 +12,86 @@ model Account {
   username String
   password String
   role     String
+}
+
+// --------------------------------------------------------------------------------
+
+model User {
+  id            String         @id @map("_id") @db.String
+  email         String         @unique
+  name          String
+  posts         Post[]
+  comments      Comment[]
+  likes         Like[]
+  reports       Report[]
+  engages       Engage[]
+  createdAt     DateTime       @default(now())
+  notifications Notification[]
+  postTime      Int?
+  deleteTime    Int?
+  editTime      Int?
+}
+
+model Post {
+  id            String         @id @default(uuid()) @map("_id") @db.String
+  title         String
+  focus         String
+  content       String
+  anonymous     Boolean
+  image         String
+  userId        String         @db.String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  engages       Engage[]
+  likes         Like[]
+  comments      Comment[]
+  reports       Report[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  notifications Notification[]
+}
+
+model Engage {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String @db.String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @db.String
+}
+
+model Like {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String @db.String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @db.String
+}
+
+model Comment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String   @db.String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @db.String
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model Report {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  postId    String   @db.String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String   @db.String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reason    String
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id     String  @id @default(auto()) @map("_id") @db.ObjectId
+  postId String  @db.String
+  post   Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId String  @db.String
+  read   Boolean
+  type   String
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

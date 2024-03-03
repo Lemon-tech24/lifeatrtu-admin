@@ -9,8 +9,13 @@ import {
   Legend,
   Cell,
   ResponsiveContainer,
+  Rectangle,
 } from "recharts";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import axios from "axios";
+import moment from "moment";
+import prisma from "../lib/prisma";
 
 const error = console.error;
 console.error = (...args: any) => {
@@ -18,28 +23,6 @@ console.error = (...args: any) => {
   error(...args);
 };
 
-const data = [
-  {
-    name: "Page A",
-    uv: 15,
-    pv: 9,
-  },
-  {
-    name: "Page B",
-    uv: 9,
-    pv: 9,
-  },
-  {
-    name: "Page C",
-    uv: 2,
-    pv: 9,
-  },
-  {
-    name: "Page D",
-    uv: 2,
-    pv: 3,
-  },
-];
 const getPath = (x: any, y: any, width: any, height: any) => {
   const radius = 18;
 
@@ -83,13 +66,7 @@ const CustomLegend = ({ payload }: any) => {
             }}
             className="w-10 h-20 inline-block rounded-3xl"
           ></span>
-          <span className="font-semibold text-sm">
-            {entry.value === "uv"
-              ? "Low Risk"
-              : entry.value === "pv"
-                ? "High Risk"
-                : "Guidance"}
-          </span>
+          <span className="font-semibold text-sm">{entry.value}</span>
         </li>
       ))}
     </ul>
@@ -97,9 +74,55 @@ const CustomLegend = ({ payload }: any) => {
 };
 
 const DashboardHome = () => {
+  const { data: session, status } = useSession();
+  const [data, setData] = useState<any>();
+  const [date, setDate] = useState<string>("");
+  useEffect(() => {
+    const controller = new AbortController();
+    const getReports = async () => {
+      try {
+        const today = new Date();
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - today.getDay() - 6);
+
+        const endOfWeek = new Date(today);
+
+        const start = startOfWeek.toISOString();
+        const end = endOfWeek.toISOString();
+
+        const response = await axios.post("/api/reports/read", {
+          start: start,
+          end: end,
+          signal: controller.signal,
+        });
+
+        const resData = response.data;
+      } catch (err) {
+        throw new Error("ERROR");
+      }
+    };
+
+    getReports();
+    return () => controller.abort();
+  }, [session, date]);
+
+  /// useRequest
+
   return (
     <>
-      <div>Life@RTU REPORT</div>
+      <select
+        className="absolute top-2 right-4 text-xl outline-none rounded-xl shadow-sm px-2"
+        disabled={status === "loading" || !session ? true : false}
+        defaultValue={"week"}
+      >
+        <option value="week">This Week</option>
+        <option value="month">This Month</option>
+        <option value="overall">All Time</option>
+      </select>
+      {/* ------------------------------------------------ */}
+      <div className="text-7xl font-bold w-full p-10 text-center">
+        Life@RTU REPORT
+      </div>
       <div className="flex-grow">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
@@ -114,30 +137,21 @@ const DashboardHome = () => {
             }}
           >
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis tickCount={10} />
+            <XAxis dataKey="createdAt" />
+            <YAxis allowDecimals={false} />
 
             <Legend content={<CustomLegend />} align="center" />
+
             <Bar
-              dataKey="uv"
-              fill="blue"
-              shape={<TriangleBar />}
-              label={{ position: "top" }}
-            >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={"blue"} />
-              ))}
-            </Bar>
-            <Bar
-              dataKey="pv"
+              dataKey="highRisk"
               fill="red"
-              shape={<TriangleBar />}
-              label={{ position: "top" }}
-            >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={"red"} />
-              ))}
-            </Bar>
+              activeBar={<Rectangle fill="pink" stroke="blue" />}
+            />
+            <Bar
+              dataKey="lowRisk"
+              fill="blue"
+              activeBar={<Rectangle fill="pink" stroke="blue" />}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
