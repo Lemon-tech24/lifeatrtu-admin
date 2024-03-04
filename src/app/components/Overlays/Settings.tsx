@@ -1,5 +1,6 @@
 import {
   isOpenAddModerators,
+  isOpenExportData,
   isOpenModerators,
   isOpenSettings,
 } from "@/app/lib/useStore";
@@ -9,6 +10,7 @@ const Settings = () => {
   const settings = isOpenSettings();
   const mods = isOpenModerators();
   const addMods = isOpenAddModerators();
+  const exportData = isOpenExportData();
   return (
     <div className="fixed top-0 left-0 w-full h-screen bg-slate-500/80 z-50 flex items-center justify-center">
       <div
@@ -45,6 +47,10 @@ const Settings = () => {
         <button
           type="button"
           className="w-full bg-white p-2 rounded-lg text-2xl"
+          onClick={() => {
+            settings.close();
+            exportData.open();
+          }}
         >
           Export Data
         </button>

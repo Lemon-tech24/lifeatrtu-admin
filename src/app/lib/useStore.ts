@@ -44,3 +44,15 @@ export const isOpenAddModerators = create<isOpen>((set) => ({
     set(() => ({ value: true }));
   },
 }));
+
+// ----------------- EXPORT DATA
+export const isOpenExportData = create<isOpen>((set) => ({
+  value: false,
+  close: () => {
+    set(() => ({ value: false }));
+  },
+
+  open: () => {
+    set(() => ({ value: true }));
+  },
+}));

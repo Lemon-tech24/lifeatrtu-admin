@@ -13,6 +13,7 @@ export async function POST(request: NextRequest) {
       const posts = await prisma.post.findMany({
         skip: skip,
         take: take,
+
         include: {
           _count: {
             select: {
@@ -30,8 +31,8 @@ export async function POST(request: NextRequest) {
           },
         },
       });
-
-      return NextResponse.json(posts);
+      const updated = posts.filter((post) => post._count.reports > 0);
+      return NextResponse.json(updated);
     } else
       return NextResponse.json({ message: "UNAUTHORIZED" }, { status: 401 });
   } catch (err) {

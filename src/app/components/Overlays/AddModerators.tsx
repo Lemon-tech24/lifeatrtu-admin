@@ -20,6 +20,7 @@ const AddModerators = () => {
               type="text"
               name="username"
               className="w-full rounded-lg px-4 text-lg"
+              placeholder="Create Username"
             />
           </div>
 
@@ -29,13 +30,39 @@ const AddModerators = () => {
               type="password"
               name="password"
               className="w-full rounded-lg px-4 text-lg"
+              placeholder="*****************"
+              minLength={8}
+            />
+          </div>
+          <div className="flex w-10/12 m-auto">
+            <span className="w-40"></span>
+
+            <div className="text-xs">
+              <p>Password must contain:</p>
+              <div className="pl-3">
+                At least 8 characters <br></br>
+                At least 1 lowercase character <br></br>
+                At least 1 uppercase character <br></br>
+                At least 1 number or special character
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-14 w-10/12">
+            <p className="w-28 text-sm font-semibold">Confirm Password: </p>
+            <input
+              type="password"
+              name="cpassword"
+              className="w-full rounded-lg px-2 text-lg"
+              placeholder="Confirm Password"
             />
           </div>
 
-          <div className="w-10/12 flex items-center justify-end gap-4">
+          <div className="w-10/12 flex items-center justify-center gap-4 mt-4">
             <button
               className="text-lg font-semibold rounded-lg px-2"
               style={{ backgroundColor: "#2D9054" }}
+              type="submit"
             >
               Confirm
             </button>
@@ -46,6 +73,7 @@ const AddModerators = () => {
                 addMods.close();
                 settings.open();
               }}
+              type="button"
             >
               Cancel
             </button>

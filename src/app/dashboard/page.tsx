@@ -8,12 +8,14 @@ import DashboardHome from "../components/DashboardHome";
 import LowRiskReports from "../components/LowRiskReports";
 import {
   isOpenAddModerators,
+  isOpenExportData,
   isOpenModerators,
   isOpenSettings,
 } from "../lib/useStore";
 import Settings from "../components/Overlays/Settings";
 import Moderators from "../components/Overlays/Moderators";
 import AddModerators from "../components/Overlays/AddModerators";
+import ExportData from "../components/Overlays/ExportData";
 
 const Page = () => {
   const router = useRouter();
@@ -43,6 +45,8 @@ const Page = () => {
   const settings = isOpenSettings();
   const mods = isOpenModerators();
   const addMods = isOpenAddModerators();
+  const exportData = isOpenExportData();
+
   return status === "loading" ? (
     <div className="flex items-center justify-center w-full min-h-screen gap-4">
       <span className="loading loading-spinner w-20 "></span>Verifying User
@@ -52,6 +56,8 @@ const Page = () => {
       {settings.value && <Settings />}
       {mods.value && <Moderators />}
       {addMods.value && <AddModerators />}
+      {exportData.value && <ExportData />}
+
       <div className="flex">
         <div className="relative w-1/5 bg-slate-300 min-h-screen">
           <div className="flex items-center justify-center gap-1 my-28">

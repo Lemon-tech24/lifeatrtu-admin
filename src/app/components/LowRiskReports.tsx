@@ -113,7 +113,7 @@ const LowRiskReports = () => {
                             <IoIosWarning />
                           </div>
                           <div
-                            className="text-base font-semibold -mb-3"
+                            className="text-base font-semibold"
                             style={{ color: "#CA0C0C" }}
                           >
                             {item._count.reports} REPORTS
@@ -121,12 +121,10 @@ const LowRiskReports = () => {
                         </div>
 
                         <div className="flex items-center justify-center gap-1">
-                          <div className="text-2xl">
+                          <div className="text-4xl">
                             <FaCommentAlt />
                           </div>
-                          <div className="text-base font-semibold -mb-3">
-                            Comments
-                          </div>
+                          <div className="text-base font-semibold">Updates</div>
                         </div>
                       </div>
                     </div>
