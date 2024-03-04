@@ -11,11 +11,13 @@ import {
   isOpenExportData,
   isOpenModerators,
   isOpenSettings,
+  isOpenUpdates,
 } from "../lib/useStore";
 import Settings from "../components/Overlays/Settings";
 import Moderators from "../components/Overlays/Moderators";
 import AddModerators from "../components/Overlays/AddModerators";
 import ExportData from "../components/Overlays/ExportData";
+import Updates from "../components/Overlays/Updates";
 
 const Page = () => {
   const router = useRouter();
@@ -46,6 +48,7 @@ const Page = () => {
   const mods = isOpenModerators();
   const addMods = isOpenAddModerators();
   const exportData = isOpenExportData();
+  const updates = isOpenUpdates();
 
   return status === "loading" ? (
     <div className="flex items-center justify-center w-full min-h-screen gap-4">
@@ -57,6 +60,7 @@ const Page = () => {
       {mods.value && <Moderators />}
       {addMods.value && <AddModerators />}
       {exportData.value && <ExportData />}
+      {updates.value && <Updates />}
 
       <div className="flex">
         <div className="relative w-1/5 bg-slate-300 min-h-screen">

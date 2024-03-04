@@ -56,3 +56,16 @@ export const isOpenExportData = create<isOpen>((set) => ({
     set(() => ({ value: true }));
   },
 }));
+
+// ----------------- UPDATES
+
+export const isOpenUpdates = create<isOpen>((set) => ({
+  value: false,
+  close: () => {
+    set(() => ({ value: false }));
+  },
+
+  open: () => {
+    set(() => ({ value: true }));
+  },
+}));

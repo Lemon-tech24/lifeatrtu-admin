@@ -22,7 +22,13 @@ export async function POST(request: NextRequest) {
           },
 
           comments: true,
-          user: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
         },
 
         orderBy: {
