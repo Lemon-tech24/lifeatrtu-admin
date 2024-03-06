@@ -1,8 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useSession } from "next-auth/react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
 const LoginForm = () => {
@@ -30,7 +30,7 @@ const LoginForm = () => {
           toast.success("Successfully Logged In");
           setLoggedIn(true);
         } else {
-          toast.error((res && res.error) || "An error occurred");
+          toast.error("Invalid Username or Password");
         }
       } catch (error) {
         toast.error("An error occurred while logging in");
@@ -41,10 +41,11 @@ const LoginForm = () => {
     }
   };
 
-  if (session && session.user && loggedIn) {
-    router.push("/dashboard");
-    return null;
-  }
+  useEffect(() => {
+    if (session && session.user && loggedIn) {
+      router.push("/dashboard");
+    }
+  }, [session, loggedIn, router]);
 
   return (
     <div className="w-7/12 m-auto flex flex-col gap-5 xl:w-10/12 md:m-0 md:w-full">

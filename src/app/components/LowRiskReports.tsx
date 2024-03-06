@@ -6,6 +6,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useInfiniteScroll } from "ahooks";
 import { useSession } from "next-auth/react";
 import LowPosts from "./LowPosts";
+import Skeleton from "./UI/Skeleton";
 
 const LowRiskReports = () => {
   const { data: session } = useSession();
@@ -46,15 +47,15 @@ const LowRiskReports = () => {
 
   return (
     <>
-      <div className="w-full flex items-center justify-end p-2 ">
-        <select className="bg-slate-300 rounded-xl px-2">
+      <div className="w-full flex items-center justify-end p-6">
+        <select className="bg-slate-300 rounded-xl px-2 text-xl border border-black border-solid shadow-lg">
           <option value="">Most Low Risk</option>
           <option value="">Least Low Risk</option>
         </select>
       </div>
 
       <div className="w-full h-full px-6" ref={reference}>
-        <LowPosts data={data} loading={loading} loadingMore={loadingMore} />
+        {loading || loadingMore ? <Skeleton /> : <LowPosts data={data} />}
       </div>
     </>
   );

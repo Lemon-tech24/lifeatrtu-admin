@@ -22,8 +22,15 @@ const Updates = () => {
 
         <div className="bg-white rounded-xl p-4 mx-16">
           <p className="text-2xl font-semibold">Moderator</p>
-          <p className="pl-4">
-            message message message message message message message
+          <p className="pl-4 text-base text-justify">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris
+            velit sapien, posuere ut tristique non, accumsan eu nisl.
+            Suspendisse nec ornare enim. Sed eget fringilla odio. Cras non
+            tristique augue. Proin ornare velit a congue pulvinar. Integer sed
+            dictum diam. Quisque laoreet vehicula erat et aliquam. Proin sed
+            ullamcorper arcu, sit amet ultricies tellus. Sed rutrum turpis id
+            volutpat feugiat. Curabitur enim mauris, vehicula non venenatis et,
+            dictum ut nunc.
           </p>
         </div>
       </div>

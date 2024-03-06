@@ -7,15 +7,15 @@ import {
   YAxis,
   CartesianGrid,
   Legend,
-  Cell,
   ResponsiveContainer,
   Rectangle,
+  LabelList,
 } from "recharts";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useSession } from "next-auth/react";
 import axios from "axios";
-import moment from "moment";
-import prisma from "../lib/prisma";
+
+import { useRequest } from "ahooks";
 
 const error = console.error;
 console.error = (...args: any) => {
@@ -23,25 +23,21 @@ console.error = (...args: any) => {
   error(...args);
 };
 
-const getPath = (x: any, y: any, width: any, height: any) => {
-  const radius = 18;
+const CustomBar = (props: any) => {
+  const { x, y, width, height } = props;
 
-  return `M${x},${y + height}
-    H${x + width}
-    V${y + radius}
-    Q${x + width},${y} ${x + width - radius},${y}
-    H${x + radius}
-    Q${x},${y} ${x},${y + radius}
-    Z`;
+  const radius = 10;
+
+  return (
+    <g>
+      <rect x={x} y={y} width={width} height={height} fill={props.fill} />
+
+      <circle cx={x + radius} cy={y} r={radius} fill={props.fill} />
+      <circle cx={x + width - radius} cy={y} r={radius} fill={props.fill} />
+      <rect x={x + radius} y={y - radius} height={radius} fill={props.fill} />
+    </g>
+  );
 };
-const colors = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "red", "pink"];
-
-const TriangleBar = (props: any) => {
-  const { fill, x, y, width, height } = props;
-
-  return <path d={getPath(x, y, width, height)} stroke="none" fill={fill} />;
-};
-
 const CustomLegend = ({ payload }: any) => {
   return (
     <ul
@@ -66,7 +62,9 @@ const CustomLegend = ({ payload }: any) => {
             }}
             className="w-10 h-20 inline-block rounded-3xl"
           ></span>
-          <span className="font-semibold text-sm">{entry.value}</span>
+          <span className="font-semibold text-xl">
+            {entry.value === "highRisk" ? "High Risk" : "Low Risk"}
+          </span>
         </li>
       ))}
     </ul>
@@ -75,48 +73,67 @@ const CustomLegend = ({ payload }: any) => {
 
 const DashboardHome = () => {
   const { data: session, status } = useSession();
-  const [data, setData] = useState<any>();
-  const [date, setDate] = useState<string>("");
-  useEffect(() => {
+
+  const [selected, setSelected] = useState<string>("");
+  const today = new Date();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay() - 6);
+
+  const endOfWeek = new Date(today);
+
+  const start = startOfWeek.toISOString();
+  const end = endOfWeek.toISOString();
+  const getReportsData = async () => {
     const controller = new AbortController();
-    const getReports = async () => {
-      try {
-        const today = new Date();
-        const startOfWeek = new Date(today);
-        startOfWeek.setDate(today.getDate() - today.getDay() - 6);
+    try {
+      const response = await axios.post("/api/reports/read", {
+        start: start,
+        end: end,
+        signal: controller.signal,
+      });
 
-        const endOfWeek = new Date(today);
-
-        const start = startOfWeek.toISOString();
-        const end = endOfWeek.toISOString();
-
-        const response = await axios.post("/api/reports/read", {
-          start: start,
-          end: end,
-          signal: controller.signal,
+      const data = response.data;
+      const combineDataByDate = (data: any) => {
+        const combinedData: any = {};
+        data.forEach((item: any) => {
+          if (!combinedData[item.date]) {
+            combinedData[item.date] = {
+              date: item.date,
+              highRisk: 0,
+              lowRisk: 0,
+            };
+          }
+          combinedData[item.date].highRisk += item.highRisk;
+          combinedData[item.date].lowRisk += item.lowRisk;
         });
-
-        const resData = response.data;
-      } catch (err) {
-        throw new Error("ERROR");
+        return Object.values(combinedData);
+      };
+      if (data.ok) {
+        const newData = combineDataByDate(data.list);
+        return newData;
       }
-    };
 
-    getReports();
-    return () => controller.abort();
-  }, [session, date]);
+      controller.abort();
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  };
 
-  /// useRequest
+  const { data, loading } = useRequest(getReportsData, {
+    refreshDeps: [session],
+  });
 
   return (
     <>
       <select
-        className="absolute top-2 right-4 text-xl outline-none rounded-xl shadow-sm px-2"
+        className="absolute top-2 right-4 text-xl outline-none rounded-xl shadow-md px-2 border border-solid border-black"
         disabled={status === "loading" || !session ? true : false}
         defaultValue={"week"}
+        onChange={(e) => setSelected(e.target.value)}
       >
-        <option value="week">This Week</option>
-        <option value="month">This Month</option>
+        <option value="week">Last 7 days</option>
+        <option value="month">Last 30 days</option>
         <option value="overall">All Time</option>
       </select>
       {/* ------------------------------------------------ */}
@@ -136,22 +153,42 @@ const DashboardHome = () => {
               bottom: 5,
             }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="createdAt" />
-            <YAxis allowDecimals={false} />
-
-            <Legend content={<CustomLegend />} align="center" />
-
-            <Bar
-              dataKey="highRisk"
-              fill="red"
-              activeBar={<Rectangle fill="pink" stroke="blue" />}
+            <CartesianGrid
+              strokeDasharray="0"
+              strokeWidth={3}
+              color="black"
+              vertical={false}
             />
+            <XAxis dataKey="date" />
+            <YAxis allowDecimals={false} tickCount={10} />
+
+            <Legend align="center" content={<CustomLegend />} />
             <Bar
               dataKey="lowRisk"
               fill="blue"
               activeBar={<Rectangle fill="pink" stroke="blue" />}
-            />
+              radius={[20, 20, 0, 0]}
+            >
+              <LabelList
+                dataKey="lowRisk"
+                position={"top"}
+                fontSize={20}
+                fontWeight={"bold"}
+              />
+            </Bar>
+            <Bar
+              dataKey="highRisk"
+              fill="red"
+              activeBar={<Rectangle fill="pink" stroke="blue" />}
+              radius={[20, 20, 0, 0]}
+            >
+              <LabelList
+                dataKey="highRisk"
+                position={"top"}
+                fontSize={20}
+                fontWeight={"bold"}
+              />
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>

@@ -91,6 +91,7 @@ const Page = () => {
                   onClick={() => {
                     setSelectedButton(item.toLowerCase());
                   }}
+                  disabled={status !== "authenticated" ? true : false}
                 >
                   {item}
                 </button>
@@ -120,9 +121,7 @@ const Page = () => {
           </div>
         </div>
 
-        <div
-          className={`w-4/5 ${selectedButton === "dashboard" ? "bg-pink-100" : "bg-white"} min-h-screen flex flex-col`}
-        >
+        <div className={`w-4/5 bg-white min-h-screen flex flex-col`}>
           {renderComponent()}
         </div>
       </div>

@@ -1,9 +1,9 @@
-import { isOpenExportData } from "@/app/lib/useStore";
+import { isOpenExportData, isOpenSettings } from "@/app/lib/useStore";
 import React from "react";
 
 const ExportData = () => {
   const { close } = isOpenExportData();
-
+  const settings = isOpenSettings();
   return (
     <div className="fixed top-0 left-0 w-full h-screen bg-slate-500/80 z-50 flex items-center justify-center">
       <div
@@ -42,7 +42,10 @@ const ExportData = () => {
           <button
             className="text-lg font-semibold rounded-lg px-2"
             style={{ backgroundColor: "#FF3F3F" }}
-            onClick={close}
+            onClick={() => {
+              close();
+              settings.open();
+            }}
             type="button"
           >
             Cancel

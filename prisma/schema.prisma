@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Account {
-  id       String @id @default(uuid()) @map("_id") @db.ObjectId
+  id       String @id @default(uuid()) @map("_id")
   username String
   password String
   role     String

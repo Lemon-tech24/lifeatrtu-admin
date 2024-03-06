@@ -7,7 +7,7 @@ import { CgProfile } from "react-icons/cg";
 import { IoIosWarning } from "react-icons/io";
 import { FaCommentAlt } from "react-icons/fa";
 import { isOpenUpdates } from "../lib/useStore";
-const LowPosts = ({ data, loading, loadingMore }: any) => {
+const LowPosts = ({ data }: any) => {
   const update = isOpenUpdates();
   return (
     <>
@@ -74,8 +74,7 @@ const LowPosts = ({ data, loading, loadingMore }: any) => {
 
                       <button
                         type="button"
-                        className={`flex items-center justify-center gap-1 ${loading || loadingMore ? "cursor-not-allowed" : "cursor-pointer"}`}
-                        disabled={loading || loadingMore ? true : false}
+                        className={`flex items-center justify-center gap-1 `}
                         onClick={update.open}
                       >
                         <div className="text-4xl">
