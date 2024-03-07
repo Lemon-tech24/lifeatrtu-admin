@@ -23,21 +23,6 @@ console.error = (...args: any) => {
   error(...args);
 };
 
-const CustomBar = (props: any) => {
-  const { x, y, width, height } = props;
-
-  const radius = 10;
-
-  return (
-    <g>
-      <rect x={x} y={y} width={width} height={height} fill={props.fill} />
-
-      <circle cx={x + radius} cy={y} r={radius} fill={props.fill} />
-      <circle cx={x + width - radius} cy={y} r={radius} fill={props.fill} />
-      <rect x={x + radius} y={y - radius} height={radius} fill={props.fill} />
-    </g>
-  );
-};
 const CustomLegend = ({ payload }: any) => {
   return (
     <ul
@@ -75,16 +60,10 @@ const DashboardHome = () => {
   const { data: session, status } = useSession();
 
   const [selected, setSelected] = useState<string>("");
-  const today = new Date();
-  const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - today.getDay() - 6);
 
-  const endOfWeek = new Date(today);
-
-  const start = startOfWeek.toISOString();
-  const end = endOfWeek.toISOString();
   const getReportsData = async () => {
     const controller = new AbortController();
+    const { start, end } = generateDateRanges(selected);
     try {
       const response = await axios.post("/api/reports/read", {
         start: start,
@@ -120,8 +99,48 @@ const DashboardHome = () => {
     }
   };
 
+  const formatDate = (date: Date) => date.toISOString();
+  const generateDateRange = (startDate: Date, endDate: Date) => {
+    return { start: formatDate(startDate), end: formatDate(endDate) };
+  };
+  const generateDateRanges = (selectedRange: string) => {
+    const today = new Date();
+    const startOfToday = new Date(today);
+    startOfToday.setHours(0, 0, 0, 0);
+
+    let startDate: Date;
+    let endDate: Date;
+
+    switch (selectedRange) {
+      case "week":
+        startDate = new Date(today);
+        startDate.setDate(today.getDate() - today.getDay() - 6);
+        endDate = new Date(today);
+        break;
+      case "month":
+        startDate = new Date(today);
+        startDate.setMonth(today.getMonth() - 30);
+        endDate = new Date(today);
+        break;
+      case "all":
+        startDate = new Date(0);
+        endDate = new Date(today);
+        break;
+      case "today":
+        startDate = startOfToday;
+        endDate = today;
+        break;
+      default:
+        startDate = startOfToday;
+        endDate = today;
+        break;
+    }
+
+    return generateDateRange(startDate, endDate);
+  };
+
   const { data, loading } = useRequest(getReportsData, {
-    refreshDeps: [session],
+    refreshDeps: [session, selected],
   });
 
   return (
@@ -129,12 +148,13 @@ const DashboardHome = () => {
       <select
         className="absolute top-2 right-4 text-xl outline-none rounded-xl shadow-md px-2 border border-solid border-black"
         disabled={status === "loading" || !session ? true : false}
-        defaultValue={"week"}
+        defaultValue={""}
         onChange={(e) => setSelected(e.target.value)}
       >
+        <option value="today">Today</option>
         <option value="week">Last 7 days</option>
         <option value="month">Last 30 days</option>
-        <option value="overall">All Time</option>
+        <option value="all">All Time</option>
       </select>
       {/* ------------------------------------------------ */}
       <div className="text-7xl font-bold w-full p-10 text-center">

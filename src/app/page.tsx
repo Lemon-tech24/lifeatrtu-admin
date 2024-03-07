@@ -32,7 +32,6 @@ export default async function Home() {
           </div>
           {/* ------------------------------------------------ */}
           <div className="font-bold text-7xl xs:text-5xl">Welcome</div>
-          <div className="text-4xl md:mt-10 xs:text-2xl">Login to admin</div>
         </div>
       </div>
       <div className="w-1/2 h-full flex items-center justify-center flex-col md:w-full">
