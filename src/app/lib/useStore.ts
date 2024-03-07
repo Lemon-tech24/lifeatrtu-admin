@@ -69,3 +69,33 @@ export const isOpenUpdates = create<isOpen>((set) => ({
     set(() => ({ value: true }));
   },
 }));
+
+// ----------------- OPEN IMAGE
+interface isOpenImage {
+  src: string;
+  value: boolean;
+  close: () => void;
+  open: () => void;
+  source: (data: any) => void;
+  clearSource: () => void;
+}
+
+export const isOpenImage = create<isOpenImage>((set) => ({
+  src: "",
+  value: false,
+  close: () => {
+    set(() => ({ value: false }));
+  },
+
+  open: () => {
+    set(() => ({ value: true }));
+  },
+
+  source: (data: any) => {
+    set(() => ({ src: data }));
+  },
+
+  clearSource: () => {
+    set(() => ({ src: "" }));
+  },
+}));

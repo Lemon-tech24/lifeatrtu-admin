@@ -9,6 +9,7 @@ import LowRiskReports from "../components/LowRiskReports";
 import {
   isOpenAddModerators,
   isOpenExportData,
+  isOpenImage,
   isOpenModerators,
   isOpenSettings,
   isOpenUpdates,
@@ -18,6 +19,7 @@ import Moderators from "../components/Overlays/Moderators";
 import AddModerators from "../components/Overlays/AddModerators";
 import ExportData from "../components/Overlays/ExportData";
 import Updates from "../components/Overlays/Updates";
+import ImagePost from "../components/Overlays/ImagePost";
 
 const Page = () => {
   const router = useRouter();
@@ -49,7 +51,7 @@ const Page = () => {
   const addMods = isOpenAddModerators();
   const exportData = isOpenExportData();
   const updates = isOpenUpdates();
-
+  const image = isOpenImage();
   return status === "loading" ? (
     <div className="flex items-center justify-center w-full min-h-screen gap-4">
       <span className="loading loading-spinner w-20 "></span>Verifying User
@@ -61,6 +63,7 @@ const Page = () => {
       {addMods.value && <AddModerators />}
       {exportData.value && <ExportData />}
       {updates.value && <Updates />}
+      {image.value && <ImagePost />}
 
       <div className="flex">
         <div className="relative w-1/5 bg-slate-300 min-h-screen">

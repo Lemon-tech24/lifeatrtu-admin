@@ -1,14 +1,18 @@
+/* eslint-disable jsx-a11y/alt-text */
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React from "react";
-
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import { CgProfile } from "react-icons/cg";
 import { IoIosWarning } from "react-icons/io";
 import { FaCommentAlt } from "react-icons/fa";
-import { isOpenUpdates } from "../lib/useStore";
+import { isOpenImage, isOpenUpdates } from "../lib/useStore";
+import moment from "moment";
+
 const LowPosts = ({ data }: any) => {
   const update = isOpenUpdates();
+  const image = isOpenImage();
   return (
     <>
       <ResponsiveMasonry>
@@ -40,6 +44,11 @@ const LowPosts = ({ data }: any) => {
                         {item.focus}
                       </div>
                     </div>
+
+                    {/* ----------------------------------------------------------------- */}
+                    <div className="">
+                      {moment(item.createdAt).format("LLL")}
+                    </div>
                     {/* ----------------------------------------------------------------- */}
 
                     <div className="flex items-center gap-2">
@@ -57,7 +66,19 @@ const LowPosts = ({ data }: any) => {
                       {item.content}
                     </div>
                     {/* ----------------------------------------------------------------- */}
-                    {item.image && <div>With image</div>}
+                    {item.image && (
+                      <div>
+                        <img
+                          src={item.image}
+                          alt="Post Image"
+                          className="cursor-pointer"
+                          onClick={() => {
+                            image.source(item.image);
+                            image.open();
+                          }}
+                        />
+                      </div>
+                    )}
                     {/* ----------------------------------------------------------------- */}
                     <div className="flex w-full items-center justify-center gap-10 mt-8">
                       <div className="flex items-center justify-center gap-1">

@@ -1,19 +1,21 @@
 import { isOpenAddModerators, isOpenSettings } from "@/app/lib/useStore";
-import React, { useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { createModerator } from "@/app/actions/createMods";
 import toast from "react-hot-toast";
+import { stat } from "fs";
 
 const AddModerators = () => {
   const addMods = isOpenAddModerators();
   const settings = isOpenSettings();
   const [password, setPassword] = useState<string>("");
   const [cpassword, setCPassword] = useState<string>("");
+  const [username, setUsername] = useState<string>("");
   const [isValid, setIsValid] = useState<boolean>(false);
   const [same, setSame] = useState<boolean>(false);
-
   const [state, formAction] = useFormState(createModerator, undefined);
   const { pending } = useFormStatus();
+  const formRef = useRef<HTMLFormElement>(null);
 
   const passwordChange = (e: any) => {
     const newPassword = e.target.value;
@@ -36,6 +38,33 @@ const AddModerators = () => {
     }
   };
 
+  useEffect(() => {
+    if (state && state?.message) {
+      toast.success(state.message, {
+        className: "text-xl text-center",
+        duration: 2000,
+      });
+      formRef.current && formRef.current.reset();
+      setPassword("");
+      setCPassword("");
+      setUsername("");
+      setIsValid(false);
+      setSame(false);
+    } else if (state?.error) {
+      toast.error(`${state?.error}`, {
+        duration: 3000,
+        className: "text-xl text-center",
+      });
+
+      formRef.current && formRef.current.reset();
+      setPassword("");
+      setCPassword("");
+      setUsername("");
+      setIsValid(false);
+      setSame(false);
+    }
+  }, [state, pending]);
+
   return (
     <div className="fixed top-0 left-0 w-full h-screen bg-slate-500/80 z-50 flex items-center justify-center">
       <div
@@ -48,6 +77,8 @@ const AddModerators = () => {
         <form
           className="w-full flex flex-col gap-2 items-center"
           action={formAction}
+          autoComplete="off"
+          ref={formRef}
         >
           <div className="flex gap-12 w-10/12">
             <p className="w-24 text-2xl">Username: </p>
@@ -56,6 +87,8 @@ const AddModerators = () => {
               name="username"
               className="w-full rounded-lg px-4 text-lg"
               placeholder="Create Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
           </div>
@@ -68,6 +101,7 @@ const AddModerators = () => {
               className="w-full rounded-lg px-4 text-lg"
               placeholder="*****************"
               minLength={8}
+              value={password}
               onChange={passwordChange}
               required
             />
@@ -102,6 +136,7 @@ const AddModerators = () => {
             <input
               type="password"
               name="cpassword"
+              value={cpassword}
               className="w-full rounded-lg px-2 text-lg"
               placeholder="Confirm Password"
               onChange={confirmPassword}
@@ -130,6 +165,7 @@ const AddModerators = () => {
                 settings.open();
                 setPassword("");
                 setCPassword("");
+                setUsername("");
                 setIsValid(false);
                 setSame(false);
               }}

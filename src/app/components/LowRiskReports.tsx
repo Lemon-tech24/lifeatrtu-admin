@@ -10,6 +10,7 @@ import Skeleton from "./UI/Skeleton";
 
 const LowRiskReports = () => {
   const { data: session } = useSession();
+  const [select, setSelect] = useState<string>("most");
 
   const reference = useRef<HTMLDivElement>(null);
   const getPosts = async (skip: any, take: number) => {
@@ -17,6 +18,7 @@ const LowRiskReports = () => {
       const response = await axios.post("/api/reports/read/low", {
         skip: skip,
         take: take,
+        order: select,
       });
 
       const data = response.data;
@@ -41,16 +43,20 @@ const LowRiskReports = () => {
     {
       target: reference,
       isNoMore: (d) => d?.skip === undefined,
-      reloadDeps: [session],
+      reloadDeps: [session, select],
     }
   );
 
   return (
     <>
       <div className="w-full flex items-center justify-end p-6">
-        <select className="bg-slate-300 rounded-xl px-2 text-xl border border-black border-solid shadow-lg">
-          <option value="">Most Low Risk</option>
-          <option value="">Least Low Risk</option>
+        <select
+          className="bg-slate-300 rounded-xl px-2 text-xl border border-black border-solid shadow-lg"
+          onChange={(e) => setSelect(e.target.value)}
+          defaultValue={"most"}
+        >
+          <option value="most">Most Low Risk</option>
+          <option value="least">Least Low Risk</option>
         </select>
       </div>
 

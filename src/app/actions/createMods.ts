@@ -1,5 +1,6 @@
 "use server";
 
+import { error } from "console";
 import prisma from "../lib/prisma";
 import bcrypt from "bcrypt";
 
@@ -25,10 +26,10 @@ export async function createModerator(currentState: any, formData: FormData) {
       });
 
       if (accounts.length >= 10) {
-        return { message: "Moderator Account creation limit reached" };
+        return { error: "Moderator Account creation limit reached" };
       } else {
         if (existing) {
-          return { message: "Existing Username Please Try again" };
+          return { error: "Existing Username Please Try again" };
         } else {
           try {
             const create_mod = await prisma.account.create({
@@ -39,7 +40,7 @@ export async function createModerator(currentState: any, formData: FormData) {
               },
             });
             if (create_mod) {
-              return { message: "Successfully created" };
+              return { message: "New Moderator Created" };
             }
 
             return { error: "Failed" };
@@ -49,6 +50,6 @@ export async function createModerator(currentState: any, formData: FormData) {
           }
         }
       }
-    } else return { message: "Invalid Password or Username" };
+    } else return { error: "Invalid Password or Username" };
   }
 }

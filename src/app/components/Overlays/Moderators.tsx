@@ -34,33 +34,43 @@ const Moderators = () => {
   });
 
   return (
-    <div className="fixed top-0 left-0 w-full h-screen bg-slate-500/80 z-50 flex items-center justify-center">
+    <div className="fixed top-0 left-0 w-full h-full bg-slate-500/80 z-50 flex items-center justify-center">
       <div
-        className="w-5/12 rounded-xl flex flex-col gap-10 p-8"
-        style={{ backgroundColor: "#D9D9D9" }}
+        className="w-7/12 rounded-xl flex flex-col px-12 p-4"
+        style={{ backgroundColor: "#D9D9D9", maxHeight: "80vh" }}
       >
-        <div className="w-full flex items-center justify-center uppercase text-3xl font-semibold">
+        <div className="flex items-center justify-center uppercase text-3xl font-semibold mb-4">
           Moderators
         </div>
-
+        <div className="flex items-center text-base font-semibold mb-2">
+          {loading ? (
+            <span className="loading loading-dots flex items-center"></span>
+          ) : (
+            data.length
+          )}
+          /10 Moderators
+        </div>
         {loading ? (
-          <div className="w-full flex items-center justify-center">
+          <div className="w-full flex items-center justify-center mb-4">
             <div className="loading loading-dots w-14"></div>
           </div>
         ) : (
-          data &&
-          data.map((item: any, key: any) => {
-            return (
-              <div key={key}>
-                <div className="text-xl font-semibold">
-                  Usernames: {item.username}
-                </div>
-                <div className="text-xl">
-                  Role: {item.role === "mod" && "Moderator"}
-                </div>
-              </div>
-            );
-          })
+          <div className="w-full overflow-auto">
+            {data &&
+              data.map((item: any, key: any) => {
+                return (
+                  <div
+                    key={key}
+                    className="flex flex-col justify-center items-start mb-4"
+                  >
+                    <div className="text-xl font-semibold">{item.username}</div>
+                    <div className="text-xl">
+                      {item.role === "mod" && "Moderator"}
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
         )}
         <div className="w-full flex items-center justify-center">
           <button
