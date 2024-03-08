@@ -10,6 +10,7 @@ import DashboardHome from "../components/DashboardHome";
 import LowRiskReports from "../components/LowRiskReports";
 import {
   isOpenAddModerators,
+  isOpenBanAccount,
   isOpenExportData,
   isOpenImage,
   isOpenModerators,
@@ -25,6 +26,8 @@ import Updates from "../components/Overlays/Updates";
 import ImagePost from "../components/Overlays/ImagePost";
 import Reports from "../components/Overlays/Reports";
 import PendingDelete from "../components/PendingDelete";
+import HighRiskReports from "../components/HighRiskReports";
+import BanAccount from "../components/BanAccount";
 
 const Page = () => {
   const router = useRouter();
@@ -58,7 +61,7 @@ const Page = () => {
         return <LowRiskReports />;
 
       case "high risk report":
-        return "high risk";
+        return <HighRiskReports />;
 
       case "pending to delete":
         return <PendingDelete />;
@@ -72,6 +75,7 @@ const Page = () => {
   const updates = isOpenUpdates();
   const image = isOpenImage();
   const report = isOpenReport();
+  const ban = isOpenBanAccount();
 
   return status === "loading" ? (
     <div className="flex items-center justify-center w-full min-h-screen gap-4">
@@ -86,6 +90,7 @@ const Page = () => {
       {updates.value && <Updates />}
       {image.value && <ImagePost />}
       {report.value && <Reports />}
+      {ban.value && <BanAccount />}
 
       <div className="flex">
         <div className="relative w-1/5 bg-slate-300 min-h-screen">
@@ -153,7 +158,8 @@ const Page = () => {
           style={{
             backgroundImage:
               selectedButton === "low risk report" ||
-              selectedButton === "high risk report"
+              selectedButton === "high risk report" ||
+              selectedButton === "pending to delete"
                 ? `url("/bg.png")`
                 : ``,
             backgroundSize: "cover",

@@ -1,14 +1,17 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useState, useRef } from "react";
+"use client";
+import axios from "axios";
+import React, { useRef, useState } from "react";
 import { useInfiniteScroll } from "ahooks";
 import { useSession } from "next-auth/react";
-import axios from "axios";
+
 import Skeleton from "./UI/Skeleton";
-import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
-import moment from "moment";
 import { CgProfile } from "react-icons/cg";
+import moment from "moment";
+import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import {
-  isApproveDelete,
+  isMarkAsDone,
+  isOpenBanAccount,
   isOpenImage,
   isOpenReport,
   isOpenUpdates,
@@ -17,18 +20,20 @@ import { IoIosWarning } from "react-icons/io";
 import { FaCommentAlt } from "react-icons/fa";
 import toast from "react-hot-toast";
 
-const PendingDelete = () => {
+const HighRiskReports = () => {
   const { data: session } = useSession();
   const [select, setSelect] = useState<string>("most");
   const reference = useRef<HTMLDivElement>(null);
+
   const image = isOpenImage();
   const report = isOpenReport();
   const update = isOpenUpdates();
-  const approve = isApproveDelete();
+  const markDone = isMarkAsDone();
+  const ban = isOpenBanAccount();
 
   const getPosts = async (skip: any, take: number) => {
     try {
-      const response = await axios.post("/api/reports/read/pending", {
+      const response = await axios.post("/api/reports/read/high", {
         skip: skip,
         take: take,
         order: select,
@@ -39,7 +44,6 @@ const PendingDelete = () => {
       if (!data || data === null || data === undefined) {
         throw new Error("Failed to fetch posts: " + data);
       }
-
       const newSkip = data.length < take ? undefined : skip + take;
 
       return {
@@ -52,16 +56,14 @@ const PendingDelete = () => {
     }
   };
 
-  const { data, loading, loadingMore, noMore, reload } = useInfiniteScroll(
-    (d) => getPosts(d?.skip ? d?.skip : 0, 10),
-    {
+  const { data, loading, loadingMore, mutate, noMore, reload } =
+    useInfiniteScroll((d) => getPosts(d?.skip ? d?.skip : 0, 10), {
       target: reference,
       isNoMore: (d) => d?.skip === undefined,
       reloadDeps: [session, select],
-    }
-  );
+    });
 
-  const approveDelete = async (postId: any) => {
+  const MarkDelete = async (postId: any) => {
     const controller = new AbortController();
     try {
       const response = await axios.post("/api/delete", {
@@ -82,13 +84,14 @@ const PendingDelete = () => {
       toast.error("ERROR");
     }
   };
+
   return (
     <>
       <div className="w-full flex items-center justify-end p-6">
         <select
           className="rounded-xl px-2 text-xl border border-black border-solid shadow-lg"
-          defaultValue={"most"}
           onChange={(e) => setSelect(e.target.value)}
+          defaultValue={"most"}
         >
           <option value="most">Most Report</option>
           <option value="least">Least Report</option>
@@ -111,25 +114,42 @@ const PendingDelete = () => {
                         className="p-2 pl-4 rounded-xl bg-slate-300 shadow-lg"
                       >
                         {/* ----------------------------------------------------------------- */}
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            type="button"
-                            className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                            disabled={loading || loadingMore}
-                            onClick={() => {
-                              approve.setPostId(item.id);
-
-                              if (item.id === approve.postId) {
-                                approveDelete(approve.postId);
-                              }
-                            }}
-                          >
-                            Approve
-                          </button>
-
-                          <button className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black">
-                            Ban
-                          </button>
+                        <div className="flex items-center justify-end">
+                          {session?.user.role === "mod" ? (
+                            !item.pending ? (
+                              <button className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black">
+                                Request to Delete
+                              </button>
+                            ) : (
+                              <></>
+                            )
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                onClick={() => {
+                                  markDone.setPostId(item.id);
+                                  if (item.id === markDone.postId) {
+                                    MarkDelete(markDone.postId);
+                                  }
+                                }}
+                              >
+                                Mark as Done
+                              </button>
+                              <button
+                                type="button"
+                                className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                onClick={() => {
+                                  ban.setUserId(item.user.id);
+                                  ban.setEmail(item.user.email);
+                                  ban.open();
+                                }}
+                              >
+                                Ban
+                              </button>
+                            </div>
+                          )}
                         </div>
                         {/* ----------------------------------------------------------------- */}
                         <div className="font-bold text-2xl">{item.title}</div>
@@ -235,4 +255,4 @@ const PendingDelete = () => {
   );
 };
 
-export default PendingDelete;
+export default HighRiskReports;

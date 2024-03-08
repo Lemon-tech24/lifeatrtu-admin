@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 const Updates = () => {
   const { data: session, status } = useSession();
   const [comment, setComment] = useState<string>("");
+  const [keyword, setKeyword] = useState<boolean>(false);
   const updates = isOpenUpdates();
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -43,6 +44,7 @@ const Updates = () => {
       const data = response.data;
 
       if (data) {
+        setKeyword(!keyword);
         return data.updates;
       }
       return data;
@@ -50,9 +52,10 @@ const Updates = () => {
       console.error();
     }
   };
+  const { data, loading } = useRequest(getUpdates, {
+    refreshDeps: [session, keyword],
+  });
 
-  const { data, loading } = useRequest(getUpdates, { refreshDeps: [session] });
-  console.log(data);
   return (
     <div className="fixed top-0 left-0 w-full h-screen bg-slate-500/80 z-50 flex items-center justify-center">
       <div
@@ -108,17 +111,3 @@ const Updates = () => {
 };
 
 export default Updates;
-
-// <div className="bg-white rounded-xl p-4 mx-16">
-//   <p className="text-2xl font-semibold">Moderator</p>
-//   <p className="pl-4 text-base text-justify">
-//     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris
-//     velit sapien, posuere ut tristique non, accumsan eu nisl.
-//     Suspendisse nec ornare enim. Sed eget fringilla odio. Cras non
-//     tristique augue. Proin ornare velit a congue pulvinar. Integer sed
-//     dictum diam. Quisque laoreet vehicula erat et aliquam. Proin sed
-//     ullamcorper arcu, sit amet ultricies tellus. Sed rutrum turpis id
-//     volutpat feugiat. Curabitur enim mauris, vehicula non venenatis
-//     et, dictum ut nunc.
-//   </p>
-// </div>

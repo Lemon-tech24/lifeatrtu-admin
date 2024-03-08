@@ -7,17 +7,33 @@ import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import { CgProfile } from "react-icons/cg";
 import { IoIosWarning } from "react-icons/io";
 import { FaCommentAlt } from "react-icons/fa";
-import { isOpenImage, isOpenReport, isOpenUpdates } from "../lib/useStore";
+import {
+  isMarkAsDone,
+  isOpenBanAccount,
+  isOpenImage,
+  isOpenReport,
+  isOpenUpdates,
+} from "../lib/useStore";
 import moment from "moment";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import axios from "axios";
+import Skeleton from "./UI/Skeleton";
 
-const LowPosts = ({ data, mutate }: any) => {
+const LowPosts = ({
+  data,
+  mutate,
+  loading,
+  loadingMore,
+  noMore,
+  reload,
+}: any) => {
   const { data: session } = useSession();
   const update = isOpenUpdates();
   const image = isOpenImage();
   const report = isOpenReport();
+  const markDone = isMarkAsDone();
+  const ban = isOpenBanAccount();
 
   const requestDelete = async (postId: string) => {
     try {
@@ -39,6 +55,27 @@ const LowPosts = ({ data, mutate }: any) => {
         });
         toast.success("Request to Delete Success");
       } else toast.error("Request to Delete Failed");
+    } catch (err) {
+      console.error(err);
+      toast.error("ERROR");
+    }
+  };
+  const MarkDelete = async (postId: any) => {
+    const controller = new AbortController();
+    try {
+      const response = await axios.post("/api/delete", {
+        postId: postId,
+        signal: controller.signal,
+      });
+
+      const data = response.data;
+
+      if (data.ok) {
+        toast.success("Successfully Deleted");
+        reload();
+      } else toast.error("Failed to Delete");
+
+      return controller.abort();
     } catch (err) {
       console.error(err);
       toast.error("ERROR");
@@ -72,12 +109,31 @@ const LowPosts = ({ data, mutate }: any) => {
                           <></>
                         )
                       ) : (
-                        <button
-                          type="button"
-                          className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                        >
-                          Mark as Done
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                            onClick={() => {
+                              markDone.setPostId(item.id);
+                              if (item.id === markDone.postId) {
+                                MarkDelete(markDone.postId);
+                              }
+                            }}
+                          >
+                            Mark as Done
+                          </button>
+                          <button
+                            type="button"
+                            className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                            onClick={() => {
+                              ban.setUserId(item.user.id);
+                              ban.setEmail(item.user.email);
+                              ban.open();
+                            }}
+                          >
+                            Ban
+                          </button>
+                        </div>
                       )}
                     </div>
                     {/* ----------------------------------------------------------------- */}
@@ -166,6 +222,16 @@ const LowPosts = ({ data, mutate }: any) => {
                 )
               );
             })}
+
+          {!loading && !loadingMore && noMore ? (
+            <div className="w-full h-full flex items-center justify-center font-semibold opacity-75">
+              <div className="bg-white rounded-lg px-2 text-xl flex items-center">
+                Nothing to Load
+              </div>
+            </div>
+          ) : (
+            <Skeleton />
+          )}
         </Masonry>
       </ResponsiveMasonry>
     </>

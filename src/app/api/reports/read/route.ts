@@ -21,6 +21,13 @@ export async function POST(request: NextRequest) {
               },
             },
           },
+          user: {
+            NOT: {
+              blacklists: {
+                some: {},
+              },
+            },
+          },
         },
         select: {
           reports: true,
@@ -47,7 +54,7 @@ export async function POST(request: NextRequest) {
             if (
               report.reason === "harassment" ||
               report.reason === "violence" ||
-              report.reason === "suicide"
+              report.reason === "suicidal or self injury"
             ) {
               acc[reportDate].highRisk++;
             } else {

@@ -143,3 +143,63 @@ export const isOpenReport = create<isOpenReport>((set) => ({
     set(() => ({ data: null }));
   },
 }));
+
+//------------------ Approve Delete
+
+interface ApproveDelete {
+  postId: string;
+  setPostId: (data: any) => void;
+}
+
+export const isApproveDelete = create<ApproveDelete>((set) => ({
+  postId: "",
+
+  setPostId: (data: any) => {
+    set(() => ({ postId: data }));
+  },
+}));
+
+//---------------- Mark as Done / Delete
+
+interface MarkAsDone {
+  postId: string;
+  setPostId: (data: any) => void;
+}
+export const isMarkAsDone = create<MarkAsDone>((set) => ({
+  postId: "",
+  setPostId: (data: any) => {
+    set(() => ({ postId: data }));
+  },
+}));
+
+//-------------- Ban Account
+
+interface BanAccount {
+  userId: string;
+  value: boolean;
+  email: string;
+  close: () => void;
+  open: () => void;
+  setUserId: (data: any) => void;
+  setEmail: (data: any) => void;
+}
+
+export const isOpenBanAccount = create<BanAccount>((set) => ({
+  userId: "",
+  value: false,
+  email: "",
+  close: () => {
+    set(() => ({ value: false }));
+  },
+
+  open: () => {
+    set(() => ({ value: true }));
+  },
+
+  setUserId: (data) => {
+    set(() => ({ userId: data }));
+  },
+  setEmail: (data: any) => {
+    set(() => ({ email: data }));
+  },
+}));

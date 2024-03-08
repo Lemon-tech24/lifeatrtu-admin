@@ -54,9 +54,8 @@ export async function POST(request: NextRequest) {
 
       const updated = posts.filter(
         (post) =>
-          post._count.reports > 0 &&
-          post._count.reports < 20 &&
-          !post.reports.some((report) =>
+          (post._count.reports > 0 && post._count.reports > 20) ||
+          post.reports.some((report) =>
             ["violence", "suicidal or self injury", "harassment"].includes(
               report.reason,
             ),

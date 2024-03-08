@@ -18,8 +18,16 @@ model Update {
   id      String @id @default(uuid()) @map("_id")
   author  String
   comment String
-  Post    Post   @relation(fields: [postId], references: [id])
+  Post    Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId  String @db.String
+}
+
+model Blacklist {
+  id     String @id @default(uuid()) @map("_id")
+  reason String
+  User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email  String @unique
+  userId String @db.String
 }
 
 // --------------------------------------------------------------------------------
@@ -38,6 +46,7 @@ model User {
   postTime      Int?
   deleteTime    Int?
   editTime      Int?
+  blacklists    Blacklist[]
 }
 
 model Post {
@@ -57,7 +66,7 @@ model Post {
   updatedAt     DateTime       @updatedAt
   notifications Notification[]
   updates       Update[]
-  pending       Boolean?
+  pending       Boolean
 }
 
 model Engage {

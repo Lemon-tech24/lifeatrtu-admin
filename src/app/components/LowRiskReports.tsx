@@ -38,14 +38,12 @@ const LowRiskReports = () => {
     }
   };
 
-  const { data, loading, loadingMore, mutate } = useInfiniteScroll(
-    (d) => getPosts(d?.skip ? d?.skip : 0, 10),
-    {
+  const { data, loading, loadingMore, mutate, noMore, reload } =
+    useInfiniteScroll((d) => getPosts(d?.skip ? d?.skip : 0, 10), {
       target: reference,
       isNoMore: (d) => d?.skip === undefined,
       reloadDeps: [session, select],
-    }
-  );
+    });
 
   return (
     <>
@@ -54,6 +52,7 @@ const LowRiskReports = () => {
           className="rounded-xl px-2 text-xl border border-black border-solid shadow-lg"
           onChange={(e) => setSelect(e.target.value)}
           defaultValue={"most"}
+          disabled={loading || loadingMore}
         >
           <option value="most">Most Report</option>
           <option value="least">Least Report</option>
@@ -61,12 +60,17 @@ const LowRiskReports = () => {
       </div>
 
       <div className="relative w-full h-full px-6" ref={reference}>
-        {loading || loadingMore ? (
-          <Skeleton />
-        ) : data && data.list.length === 0 ? (
+        {!loading && !loadingMore && data && data.list.length === 0 ? (
           <div className="text-2xl font-semibold">No Reports</div>
         ) : (
-          <LowPosts data={data} mutate={mutate} />
+          <LowPosts
+            data={data}
+            mutate={mutate}
+            loading={loading}
+            loadingMore={loadingMore}
+            noMore={noMore}
+            reload={reload}
+          />
         )}
       </div>
     </>
