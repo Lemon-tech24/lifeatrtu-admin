@@ -6,7 +6,9 @@ import { authOptions } from "@/app/lib/auth";
 import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
-  icons: "",
+  icons: {
+    icon: "/logoicon.png",
+  },
   title: "Life@RTU: Admin Panel",
   description: "Life@RTU: Admin Panel",
 };
@@ -20,6 +22,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+      </head>
       <body>
         <Toaster />
         <AuthProvider session={session}>{children}</AuthProvider>

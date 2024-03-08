@@ -22,15 +22,15 @@ const LowRiskReports = () => {
       });
 
       const data = response.data;
-      const newSkip = skip + take;
 
       if (!data || data === null || data === undefined) {
         throw new Error("Failed to fetch posts: " + data);
       }
+      const newSkip = data.length < take ? undefined : skip + take;
 
       return {
         list: data,
-        skip: data && data.length < 10 ? undefined : newSkip,
+        skip: newSkip,
       };
     } catch (err) {
       console.error("Error fetching posts:", err);
@@ -38,7 +38,7 @@ const LowRiskReports = () => {
     }
   };
 
-  const { data, loading, loadingMore, noMore } = useInfiniteScroll(
+  const { data, loading, loadingMore, mutate } = useInfiniteScroll(
     (d) => getPosts(d?.skip ? d?.skip : 0, 10),
     {
       target: reference,
@@ -51,17 +51,23 @@ const LowRiskReports = () => {
     <>
       <div className="w-full flex items-center justify-end p-6">
         <select
-          className="bg-slate-300 rounded-xl px-2 text-xl border border-black border-solid shadow-lg"
+          className="rounded-xl px-2 text-xl border border-black border-solid shadow-lg"
           onChange={(e) => setSelect(e.target.value)}
           defaultValue={"most"}
         >
-          <option value="most">Most Low Risk</option>
-          <option value="least">Least Low Risk</option>
+          <option value="most">Most Report</option>
+          <option value="least">Least Report</option>
         </select>
       </div>
 
-      <div className="w-full h-full px-6" ref={reference}>
-        {loading || loadingMore ? <Skeleton /> : <LowPosts data={data} />}
+      <div className="relative w-full h-full px-6" ref={reference}>
+        {loading || loadingMore ? (
+          <Skeleton />
+        ) : data && data.list.length === 0 ? (
+          <div className="text-2xl font-semibold">No Reports</div>
+        ) : (
+          <LowPosts data={data} mutate={mutate} />
+        )}
       </div>
     </>
   );

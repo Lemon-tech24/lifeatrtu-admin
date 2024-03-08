@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/alt-text */
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { signOut } from "next-auth/react";
@@ -11,6 +13,7 @@ import {
   isOpenExportData,
   isOpenImage,
   isOpenModerators,
+  isOpenReport,
   isOpenSettings,
   isOpenUpdates,
 } from "../lib/useStore";
@@ -20,6 +23,8 @@ import AddModerators from "../components/Overlays/AddModerators";
 import ExportData from "../components/Overlays/ExportData";
 import Updates from "../components/Overlays/Updates";
 import ImagePost from "../components/Overlays/ImagePost";
+import Reports from "../components/Overlays/Reports";
+import PendingDelete from "../components/PendingDelete";
 
 const Page = () => {
   const router = useRouter();
@@ -29,9 +34,20 @@ const Page = () => {
       redirect("/");
     },
   });
-  const [selectedButton, setSelectedButton] = useState<string>("dashboard");
 
-  const buttons = ["Dashboard", "High Risk Report", "Low Risk Report"];
+  const [selectedButton, setSelectedButton] = useState<string>(
+    session?.user.role === "mod" ? "high risk report" : "dashboard"
+  );
+
+  const buttons =
+    session?.user?.role === "mod"
+      ? ["High Risk Report", "Low Risk Report"]
+      : [
+          "Dashboard",
+          "High Risk Report",
+          "Low Risk Report",
+          "Pending to Delete",
+        ];
 
   const renderComponent = () => {
     switch (selectedButton) {
@@ -43,6 +59,9 @@ const Page = () => {
 
       case "high risk report":
         return "high risk";
+
+      case "pending to delete":
+        return <PendingDelete />;
     }
   };
 
@@ -52,6 +71,8 @@ const Page = () => {
   const exportData = isOpenExportData();
   const updates = isOpenUpdates();
   const image = isOpenImage();
+  const report = isOpenReport();
+
   return status === "loading" ? (
     <div className="flex items-center justify-center w-full min-h-screen gap-4">
       <span className="loading loading-spinner w-20 "></span>Verifying User
@@ -64,6 +85,7 @@ const Page = () => {
       {exportData.value && <ExportData />}
       {updates.value && <Updates />}
       {image.value && <ImagePost />}
+      {report.value && <Reports />}
 
       <div className="flex">
         <div className="relative w-1/5 bg-slate-300 min-h-screen">
@@ -90,7 +112,7 @@ const Page = () => {
               return (
                 <button
                   key={key}
-                  className={`text-2xl font-semibold hover:bg-slate-400 hover:text-white duration-700 ${item === selectedButton && "bg-slate-400"}`}
+                  className={`text-2xl font-semibold hover:bg-slate-400 hover:text-white duration-700 ${item.toLowerCase() === selectedButton && "bg-slate-400 text-white"}`}
                   onClick={() => {
                     setSelectedButton(item.toLowerCase());
                   }}
@@ -103,13 +125,15 @@ const Page = () => {
           </div>
 
           <div className="absolute inset-x-0 bottom-4 flex items-center justify-center flex-col gap-2">
-            <button
-              type="button"
-              className="bg-gray-400 w-32 px-5 rounded-xl text-xl"
-              onClick={settings.open}
-            >
-              Settings
-            </button>
+            {session.user.role !== "mod" && (
+              <button
+                type="button"
+                className="bg-gray-400 w-32 px-5 rounded-xl text-xl"
+                onClick={settings.open}
+              >
+                Settings
+              </button>
+            )}
             <button
               type="button"
               className="bg-red-500 w-32 px-5 rounded-xl text-xl"
@@ -124,7 +148,18 @@ const Page = () => {
           </div>
         </div>
 
-        <div className={`w-4/5 bg-white min-h-screen flex flex-col`}>
+        <div
+          className={`relative w-4/5 min-h-screen flex flex-col`}
+          style={{
+            backgroundImage:
+              selectedButton === "low risk report" ||
+              selectedButton === "high risk report"
+                ? `url("/bg.png")`
+                : ``,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
           {renderComponent()}
         </div>
       </div>

@@ -160,57 +160,65 @@ const DashboardHome = () => {
       <div className="text-7xl font-bold w-full p-10 text-center">
         Life@RTU REPORT
       </div>
-      <div className="flex-grow">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            width={500}
-            height={300}
-            data={data}
-            margin={{
-              top: 20,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <CartesianGrid
-              strokeDasharray="0"
-              strokeWidth={3}
-              color="black"
-              vertical={false}
-            />
-            <XAxis dataKey="date" />
-            <YAxis allowDecimals={false} tickCount={10} />
+      <div
+        className={`flex-grow ${(loading || data?.length === 0) && "flex w-full h-full items-center justify-center"}`}
+      >
+        {loading ? (
+          <div className="loading loading-dots w-20"></div>
+        ) : data && data.length === 0 ? (
+          <div className="text-2xl font-semibold">No Reports to Display</div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              width={500}
+              height={300}
+              data={data}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 20,
+                bottom: 5,
+              }}
+            >
+              <CartesianGrid
+                strokeDasharray="0"
+                strokeWidth={3}
+                color="black"
+                vertical={false}
+              />
+              <XAxis dataKey="date" />
+              <YAxis allowDecimals={false} tickCount={10} />
 
-            <Legend align="center" content={<CustomLegend />} />
-            <Bar
-              dataKey="lowRisk"
-              fill="blue"
-              activeBar={<Rectangle fill="pink" stroke="blue" />}
-              radius={[20, 20, 0, 0]}
-            >
-              <LabelList
+              <Legend align="center" content={<CustomLegend />} />
+              <Bar
                 dataKey="lowRisk"
-                position={"top"}
-                fontSize={20}
-                fontWeight={"bold"}
-              />
-            </Bar>
-            <Bar
-              dataKey="highRisk"
-              fill="red"
-              activeBar={<Rectangle fill="pink" stroke="blue" />}
-              radius={[20, 20, 0, 0]}
-            >
-              <LabelList
+                fill="blue"
+                activeBar={<Rectangle fill="pink" stroke="blue" />}
+                radius={[20, 20, 0, 0]}
+              >
+                <LabelList
+                  dataKey="lowRisk"
+                  position={"top"}
+                  fontSize={20}
+                  fontWeight={"bold"}
+                />
+              </Bar>
+              <Bar
                 dataKey="highRisk"
-                position={"top"}
-                fontSize={20}
-                fontWeight={"bold"}
-              />
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+                fill="red"
+                activeBar={<Rectangle fill="pink" stroke="blue" />}
+                radius={[20, 20, 0, 0]}
+              >
+                <LabelList
+                  dataKey="highRisk"
+                  position={"top"}
+                  fontSize={20}
+                  fontWeight={"bold"}
+                />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </>
   );

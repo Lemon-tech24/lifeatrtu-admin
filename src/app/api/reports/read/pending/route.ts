@@ -6,22 +6,20 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   const { skip, take, order } = await request.json();
+
   try {
     const session = await getServerSession(authOptions);
 
     if (session) {
-      const posts = await prisma.post.findMany({
+      const pendingPosts = await prisma.post.findMany({
         skip: skip,
         take: take,
 
-        include: {
-          _count: {
-            select: {
-              reports: {},
-            },
-          },
+        where: {
+          pending: true,
+        },
 
-          comments: true,
+        include: {
           user: {
             select: {
               id: true,
@@ -34,6 +32,11 @@ export async function POST(request: NextRequest) {
               reason: true,
             },
           },
+          _count: {
+            select: {
+              reports: true,
+            },
+          },
         },
 
         orderBy: {
@@ -43,16 +46,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      const updated = posts.filter(
-        (post) =>
-          post._count.reports > 0 &&
-          post._count.reports < 20 &&
-          !post.reports.some((report) =>
-            ["violence", "suicide", "harassment"].includes(report.reason),
-          ),
-      );
-
-      return NextResponse.json(updated);
+      return NextResponse.json(pendingPosts);
     } else
       return NextResponse.json({ message: "UNAUTHORIZED" }, { status: 401 });
   } catch (err) {

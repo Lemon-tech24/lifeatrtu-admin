@@ -59,7 +59,16 @@ export const isOpenExportData = create<isOpen>((set) => ({
 
 // ----------------- UPDATES
 
-export const isOpenUpdates = create<isOpen>((set) => ({
+interface isOpenUpdate {
+  postId: string;
+  value: boolean;
+  close: () => void;
+  open: () => void;
+  setPostId: (data: any) => void;
+}
+
+export const isOpenUpdates = create<isOpenUpdate>((set) => ({
+  postId: "",
   value: false,
   close: () => {
     set(() => ({ value: false }));
@@ -67,6 +76,10 @@ export const isOpenUpdates = create<isOpen>((set) => ({
 
   open: () => {
     set(() => ({ value: true }));
+  },
+
+  setPostId: (data: any) => {
+    set(() => ({ postId: data }));
   },
 }));
 
@@ -97,5 +110,36 @@ export const isOpenImage = create<isOpenImage>((set) => ({
 
   clearSource: () => {
     set(() => ({ src: "" }));
+  },
+}));
+
+// -------------- OPEN Report
+
+interface isOpenReport {
+  data: any;
+  value: boolean;
+  close: () => void;
+  open: () => void;
+  setData: (data: any) => void;
+  clearData: () => void;
+}
+
+export const isOpenReport = create<isOpenReport>((set) => ({
+  data: null,
+  value: false,
+  close: () => {
+    set(() => ({ value: false }));
+  },
+
+  open: () => {
+    set(() => ({ value: true }));
+  },
+
+  setData: (data) => {
+    set(() => ({ data: data }));
+  },
+
+  clearData: () => {
+    set(() => ({ data: null }));
   },
 }));

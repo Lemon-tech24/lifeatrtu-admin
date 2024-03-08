@@ -4,7 +4,6 @@ import prisma from "./prisma";
 import { compareSync } from "bcrypt";
 export const authOptions: AuthOptions = {
   session: {
-    strategy: "jwt",
     maxAge: 60 * 60 * 24,
   },
 
@@ -15,7 +14,7 @@ export const authOptions: AuthOptions = {
         username: { label: "Username", type: "text", placeholder: "email" },
         password: {
           label: "Password",
-          type: "passowrd",
+          type: "password",
           placeholder: "password",
         },
       },
@@ -54,13 +53,36 @@ export const authOptions: AuthOptions = {
               );
 
               if (comparePass) {
-                return { id: checkMods.id, name: checkMods.username };
+                return {
+                  id: checkMods.id,
+                  name: checkMods.username,
+                  role: "mod",
+                };
               }
+              return { id: "", name: "" }; // or return {} or any other appropriate value
             }
+            return { id: "", name: "" };
           }
         }
         return null;
       },
     }),
   ],
+
+  callbacks: {
+    jwt({ token, user, account, profile }) {
+      if (account?.provider === "credentials" && user !== undefined) {
+        token.user = user;
+      }
+      return token;
+    },
+
+    session({ session, token, user }) {
+      if (session && token.user !== undefined) {
+        session.user = token.user as any;
+      }
+
+      return session;
+    },
+  },
 };

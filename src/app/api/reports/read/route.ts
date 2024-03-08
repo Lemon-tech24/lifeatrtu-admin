@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
 
           if (acc[reportDate]) {
             if (
-              report.reason === "hate speech" ||
+              report.reason === "harassment" ||
               report.reason === "violence" ||
               report.reason === "suicide"
             ) {

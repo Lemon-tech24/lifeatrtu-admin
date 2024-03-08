@@ -5,7 +5,6 @@ import prisma from "../lib/prisma";
 import bcrypt from "bcrypt";
 
 export async function createModerator(currentState: any, formData: FormData) {
-  "use server";
   const username = formData.get("username");
   const password = formData.get("password");
   const cpassword = formData.get("cpassword");

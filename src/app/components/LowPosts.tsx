@@ -7,12 +7,44 @@ import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import { CgProfile } from "react-icons/cg";
 import { IoIosWarning } from "react-icons/io";
 import { FaCommentAlt } from "react-icons/fa";
-import { isOpenImage, isOpenUpdates } from "../lib/useStore";
+import { isOpenImage, isOpenReport, isOpenUpdates } from "../lib/useStore";
 import moment from "moment";
+import { useSession } from "next-auth/react";
+import toast from "react-hot-toast";
+import axios from "axios";
 
-const LowPosts = ({ data }: any) => {
+const LowPosts = ({ data, mutate }: any) => {
+  const { data: session } = useSession();
   const update = isOpenUpdates();
   const image = isOpenImage();
+  const report = isOpenReport();
+
+  const requestDelete = async (postId: string) => {
+    try {
+      const response = await axios.post("/api/request/delete", {
+        postId: postId,
+      });
+
+      const data = response.data;
+
+      if (data.ok) {
+        mutate((currentData: any) => {
+          const updatedList = currentData.list.map((item: any) => {
+            if (item.id === postId) {
+              return { ...item, pending: true };
+            }
+            return item;
+          });
+          return { ...currentData, list: updatedList };
+        });
+        toast.success("Request to Delete Success");
+      } else toast.error("Request to Delete Failed");
+    } catch (err) {
+      console.error(err);
+      toast.error("ERROR");
+    }
+  };
+
   return (
     <>
       <ResponsiveMasonry>
@@ -28,12 +60,25 @@ const LowPosts = ({ data }: any) => {
                   >
                     {/* ----------------------------------------------------------------- */}
                     <div className="flex items-center justify-end">
-                      <button
-                        type="button"
-                        className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                      >
-                        Mark as Done
-                      </button>
+                      {session?.user.role === "mod" ? (
+                        !item.pending ? (
+                          <button
+                            onClick={() => requestDelete(item.id)}
+                            className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                          >
+                            Request to Delete
+                          </button>
+                        ) : (
+                          <></>
+                        )
+                      ) : (
+                        <button
+                          type="button"
+                          className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                        >
+                          Mark as Done
+                        </button>
+                      )}
                     </div>
                     {/* ----------------------------------------------------------------- */}
                     <div className="font-bold text-2xl">{item.title}</div>
@@ -57,7 +102,9 @@ const LowPosts = ({ data }: any) => {
                       </div>
 
                       <div className="text-xl font-semibold">
-                        {item.user.name}
+                        {session?.user.role === "mod"
+                          ? item.anonymous && "Anonymous"
+                          : item.user.name}
                       </div>
                     </div>
                     {/* ----------------------------------------------------------------- */}
@@ -81,7 +128,13 @@ const LowPosts = ({ data }: any) => {
                     )}
                     {/* ----------------------------------------------------------------- */}
                     <div className="flex w-full items-center justify-center gap-10 mt-8">
-                      <div className="flex items-center justify-center gap-1">
+                      <div
+                        className="flex items-center justify-center gap-1 cursor-pointer"
+                        onClick={() => {
+                          report.setData(item);
+                          report.open();
+                        }}
+                      >
                         <div className="text-4xl">
                           <IoIosWarning />
                         </div>
@@ -96,7 +149,10 @@ const LowPosts = ({ data }: any) => {
                       <button
                         type="button"
                         className={`flex items-center justify-center gap-1 `}
-                        onClick={update.open}
+                        onClick={() => {
+                          update.setPostId(item.id);
+                          update.open();
+                        }}
                       >
                         <div className="text-4xl">
                           <FaCommentAlt />
