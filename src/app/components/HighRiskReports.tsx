@@ -102,153 +102,155 @@ const HighRiskReports = () => {
         {!loading && !loadingMore && data && data.list.length === 0 ? (
           <div className="text-2xl font-semibold">No Reports</div>
         ) : (
-          <ResponsiveMasonry>
-            <Masonry gutter="20px">
-              {data &&
-                data.list &&
-                data.list.map((item: any, key: any) => {
-                  return (
-                    item && (
-                      <div
-                        key={key}
-                        className="p-2 pl-4 rounded-xl bg-slate-300 shadow-lg"
-                      >
-                        {/* ----------------------------------------------------------------- */}
-                        <div className="flex items-center justify-end">
-                          {session?.user.role === "mod" ? (
-                            !item.pending ? (
-                              <button className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black">
-                                Request to Delete
-                              </button>
+          <div className="w-full overflow-y-auto">
+            <ResponsiveMasonry>
+              <Masonry gutter="20px">
+                {data &&
+                  data.list &&
+                  data.list.map((item: any, key: any) => {
+                    return (
+                      item && (
+                        <div
+                          key={key}
+                          className="p-2 pl-4 rounded-xl bg-slate-300 shadow-lg"
+                        >
+                          {/* ----------------------------------------------------------------- */}
+                          <div className="flex items-center justify-end">
+                            {session?.user.role === "mod" ? (
+                              !item.pending ? (
+                                <button className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black">
+                                  Request to Delete
+                                </button>
+                              ) : (
+                                <></>
+                              )
                             ) : (
-                              <></>
-                            )
-                          ) : (
-                            <div className="flex items-center gap-2">
-                              <button
-                                type="button"
-                                className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                  onClick={() => {
+                                    markDone.setPostId(item.id);
+                                    if (item.id === markDone.postId) {
+                                      MarkDelete(markDone.postId);
+                                    }
+                                  }}
+                                >
+                                  Mark as Done
+                                </button>
+                                <button
+                                  type="button"
+                                  className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                  onClick={() => {
+                                    ban.setUserId(item.user.id);
+                                    ban.setEmail(item.user.email);
+                                    ban.open();
+                                  }}
+                                >
+                                  Ban
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                          {/* ----------------------------------------------------------------- */}
+                          <div className="font-bold text-2xl">{item.title}</div>
+                          {/* ----------------------------------------------------------------- */}
+                          <div className="flex gap-2 text-2xl uppercase font-bold">
+                            Focus:
+                            <div className="font-normal text-xl flex items-center justify-center">
+                              {item.focus}
+                            </div>
+                          </div>
+
+                          {/* ----------------------------------------------------------------- */}
+                          <div className="">
+                            {moment(item.createdAt).format("LLL")}
+                          </div>
+                          {/* ----------------------------------------------------------------- */}
+
+                          <div className="flex items-center gap-2">
+                            <div className="text-4xl">
+                              <CgProfile />
+                            </div>
+
+                            <div className="text-xl font-semibold">
+                              {session?.user.role === "mod"
+                                ? item.anonymous && "Anonymous"
+                                : item.user.name}
+                            </div>
+                          </div>
+                          {/* ----------------------------------------------------------------- */}
+
+                          <div className="text-lg break-words text-justify w-full">
+                            {item.content}
+                          </div>
+                          {/* ----------------------------------------------------------------- */}
+                          {item.image && (
+                            <div>
+                              <img
+                                src={item.image}
+                                alt="Post Image"
+                                className="cursor-pointer"
                                 onClick={() => {
-                                  markDone.setPostId(item.id);
-                                  if (item.id === markDone.postId) {
-                                    MarkDelete(markDone.postId);
-                                  }
+                                  image.source(item.image);
+                                  image.open();
                                 }}
-                              >
-                                Mark as Done
-                              </button>
-                              <button
-                                type="button"
-                                className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                                onClick={() => {
-                                  ban.setUserId(item.user.id);
-                                  ban.setEmail(item.user.email);
-                                  ban.open();
-                                }}
-                              >
-                                Ban
-                              </button>
+                              />
                             </div>
                           )}
-                        </div>
-                        {/* ----------------------------------------------------------------- */}
-                        <div className="font-bold text-2xl">{item.title}</div>
-                        {/* ----------------------------------------------------------------- */}
-                        <div className="flex gap-2 text-2xl uppercase font-bold">
-                          Focus:
-                          <div className="font-normal text-xl flex items-center justify-center">
-                            {item.focus}
-                          </div>
-                        </div>
-
-                        {/* ----------------------------------------------------------------- */}
-                        <div className="">
-                          {moment(item.createdAt).format("LLL")}
-                        </div>
-                        {/* ----------------------------------------------------------------- */}
-
-                        <div className="flex items-center gap-2">
-                          <div className="text-4xl">
-                            <CgProfile />
-                          </div>
-
-                          <div className="text-xl font-semibold">
-                            {session?.user.role === "mod"
-                              ? item.anonymous && "Anonymous"
-                              : item.user.name}
-                          </div>
-                        </div>
-                        {/* ----------------------------------------------------------------- */}
-
-                        <div className="text-lg break-words text-justify w-full">
-                          {item.content}
-                        </div>
-                        {/* ----------------------------------------------------------------- */}
-                        {item.image && (
-                          <div>
-                            <img
-                              src={item.image}
-                              alt="Post Image"
-                              className="cursor-pointer"
-                              onClick={() => {
-                                image.source(item.image);
-                                image.open();
-                              }}
-                            />
-                          </div>
-                        )}
-                        {/* ----------------------------------------------------------------- */}
-                        <div className="flex w-full items-center justify-center gap-10 mt-8">
-                          <div
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                            onClick={() => {
-                              report.setData(item);
-                              report.open();
-                            }}
-                          >
-                            <div className="text-4xl">
-                              <IoIosWarning />
-                            </div>
+                          {/* ----------------------------------------------------------------- */}
+                          <div className="flex w-full items-center justify-center gap-10 mt-8">
                             <div
-                              className="text-base font-semibold -mb-3"
-                              style={{ color: "#CA0C0C" }}
+                              className="flex items-center justify-center gap-1 cursor-pointer"
+                              onClick={() => {
+                                report.setData(item);
+                                report.open();
+                              }}
                             >
-                              {item._count.reports} REPORTS
+                              <div className="text-4xl">
+                                <IoIosWarning />
+                              </div>
+                              <div
+                                className="text-base font-semibold -mb-3"
+                                style={{ color: "#CA0C0C" }}
+                              >
+                                {item._count.reports} REPORTS
+                              </div>
                             </div>
+
+                            <button
+                              type="button"
+                              className={`flex items-center justify-center gap-1 `}
+                              onClick={() => {
+                                update.setPostId(item.id);
+                                update.open();
+                              }}
+                            >
+                              <div className="text-4xl">
+                                <FaCommentAlt />
+                              </div>
+                              <div className="text-base font-semibold -mb-2">
+                                Updates
+                              </div>
+                            </button>
                           </div>
-
-                          <button
-                            type="button"
-                            className={`flex items-center justify-center gap-1 `}
-                            onClick={() => {
-                              update.setPostId(item.id);
-                              update.open();
-                            }}
-                          >
-                            <div className="text-4xl">
-                              <FaCommentAlt />
-                            </div>
-                            <div className="text-base font-semibold -mb-2">
-                              Updates
-                            </div>
-                          </button>
                         </div>
-                      </div>
-                    )
-                  );
-                })}
+                      )
+                    );
+                  })}
 
-              {!loading && !loadingMore && noMore ? (
-                <div className="w-full h-full flex items-center justify-center font-semibold opacity-75">
-                  <div className="bg-white rounded-lg px-2 text-xl flex items-center">
-                    Nothing to Load
+                {!loading && !loadingMore && noMore ? (
+                  <div className="w-full h-full flex items-center justify-center font-semibold opacity-75">
+                    <div className="bg-white rounded-lg px-2 text-xl flex items-center">
+                      Nothing to Load
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <Skeleton />
-              )}
-            </Masonry>
-          </ResponsiveMasonry>
+                ) : (
+                  <Skeleton />
+                )}
+              </Masonry>
+            </ResponsiveMasonry>
+          </div>
         )}
       </div>
     </>

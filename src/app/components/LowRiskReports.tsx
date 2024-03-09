@@ -6,7 +6,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { useInfiniteScroll } from "ahooks";
 import { useSession } from "next-auth/react";
 import LowPosts from "./LowPosts";
-import Skeleton from "./UI/Skeleton";
 
 const LowRiskReports = () => {
   const { data: session } = useSession();
@@ -63,14 +62,16 @@ const LowRiskReports = () => {
         {!loading && !loadingMore && data && data.list.length === 0 ? (
           <div className="text-2xl font-semibold">No Reports</div>
         ) : (
-          <LowPosts
-            data={data}
-            mutate={mutate}
-            loading={loading}
-            loadingMore={loadingMore}
-            noMore={noMore}
-            reload={reload}
-          />
+          <div className="w-full overflow-y-auto">
+            <LowPosts
+              data={data}
+              mutate={mutate}
+              loading={loading}
+              loadingMore={loadingMore}
+              noMore={noMore}
+              reload={reload}
+            />
+          </div>
         )}
       </div>
     </>

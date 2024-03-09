@@ -9,6 +9,7 @@ import moment from "moment";
 import { CgProfile } from "react-icons/cg";
 import {
   isApproveDelete,
+  isOpenBanAccount,
   isOpenImage,
   isOpenReport,
   isOpenUpdates,
@@ -25,6 +26,7 @@ const PendingDelete = () => {
   const report = isOpenReport();
   const update = isOpenUpdates();
   const approve = isApproveDelete();
+  const ban = isOpenBanAccount();
 
   const getPosts = async (skip: any, take: number) => {
     try {
@@ -57,7 +59,7 @@ const PendingDelete = () => {
     {
       target: reference,
       isNoMore: (d) => d?.skip === undefined,
-      reloadDeps: [session, select],
+      reloadDeps: [session, select, ban.value],
     }
   );
 
@@ -127,7 +129,14 @@ const PendingDelete = () => {
                             Approve
                           </button>
 
-                          <button className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black">
+                          <button
+                            className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                            onClick={() => {
+                              ban.setEmail(item.user.email);
+                              ban.setUserId(item.user.id);
+                              ban.open();
+                            }}
+                          >
                             Ban
                           </button>
                         </div>
