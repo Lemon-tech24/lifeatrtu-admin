@@ -19,50 +19,31 @@ export const authOptions: AuthOptions = {
         },
       },
       async authorize(credentials) {
-        const user = {
-          id: "1",
-          name: "Admin1",
-        };
-        const user_1 = {
-          id: "2",
-          name: "Admin2",
-        };
-
         if (credentials) {
+          const { username, password } = credentials;
+
           if (
-            credentials.username === `${process.env.NEXT_PUBLIC_A_A}` &&
-            credentials.password === `${process.env.NEXT_PUBLIC_P_A}`
+            (username === process.env.NEXT_PUBLIC_A_A &&
+              password === process.env.NEXT_PUBLIC_P_A) ||
+            (username === process.env.NEXT_PUBLIC_A_B &&
+              password === process.env.NEXT_PUBLIC_P_B)
           ) {
-            return user;
-          } else if (
-            credentials.username === `${process.env.NEXT_PUBLIC_A_B}` &&
-            credentials.password === `${process.env.NEXT_PUBLIC_P_B}`
-          ) {
-            return user_1;
-          } else {
-            const checkMods = await prisma.account.findFirst({
-              where: {
-                username: credentials.username,
-              },
-            });
-
-            if (checkMods) {
-              const comparePass = compareSync(
-                credentials.password,
-                checkMods.password,
-              );
-
-              if (comparePass) {
-                return {
-                  id: checkMods.id,
-                  name: checkMods.username,
-                  role: "mod",
-                };
-              }
-              return { id: "", name: "" }; // or return {} or any other appropriate value
-            }
-            return { id: "", name: "" };
+            return { id: "admin", name: "Admin" };
           }
+
+          const user = await prisma.account.findFirst({
+            where: { username },
+          });
+
+          if (user && compareSync(password, user.password)) {
+            return {
+              id: user.id,
+              name: user.username,
+              role: "mod",
+            };
+          }
+
+          return null;
         }
         return null;
       },
