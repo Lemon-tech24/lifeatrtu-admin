@@ -42,8 +42,6 @@ export const authOptions: AuthOptions = {
               role: "mod",
             };
           }
-
-          return null;
         }
         return null;
       },
