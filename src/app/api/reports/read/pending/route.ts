@@ -17,6 +17,13 @@ export async function POST(request: NextRequest) {
 
         where: {
           pending: true,
+          user: {
+            NOT: {
+              blacklists: {
+                some: {},
+              },
+            },
+          },
         },
 
         include: {

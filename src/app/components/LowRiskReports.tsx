@@ -6,11 +6,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { useInfiniteScroll } from "ahooks";
 import { useSession } from "next-auth/react";
 import LowPosts from "./LowPosts";
+import { isOpenBanAccount } from "../lib/useStore";
 
 const LowRiskReports = () => {
   const { data: session } = useSession();
   const [select, setSelect] = useState<string>("most");
-
+  const ban = isOpenBanAccount();
   const reference = useRef<HTMLDivElement>(null);
   const getPosts = async (skip: any, take: number) => {
     try {
@@ -41,7 +42,7 @@ const LowRiskReports = () => {
     useInfiniteScroll((d) => getPosts(d?.skip ? d?.skip : 0, 10), {
       target: reference,
       isNoMore: (d) => d?.skip === undefined,
-      reloadDeps: [session, select],
+      reloadDeps: [session, select, ban.value],
     });
 
   return (

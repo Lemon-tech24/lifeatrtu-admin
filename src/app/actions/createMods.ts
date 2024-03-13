@@ -1,6 +1,5 @@
 "use server";
 
-import { error } from "console";
 import prisma from "../lib/prisma";
 import bcrypt from "bcrypt";
 

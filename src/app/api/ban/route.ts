@@ -19,8 +19,8 @@ export async function POST(request: NextRequest) {
       });
 
       if (banUser) {
-        return NextResponse.json({ ok: true });
-      } else return NextResponse.json({ ok: false });
+        return NextResponse.json({ ok: true, msg: "User Ban Successfully" });
+      } else return NextResponse.json({ ok: false, msg: "Failed to Ban User" });
     } else
       return NextResponse.json({ message: "UNAUTHORIZED" }, { status: 401 });
   } catch (err) {

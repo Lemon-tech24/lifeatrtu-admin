@@ -66,6 +66,7 @@ const PendingDelete = () => {
   const approveDelete = async (postId: any) => {
     const controller = new AbortController();
     try {
+      const loadingToast = toast.loading("Deleting");
       const response = await axios.post("/api/delete", {
         postId: postId,
         signal: controller.signal,
@@ -74,10 +75,11 @@ const PendingDelete = () => {
       const data = response.data;
 
       if (data.ok) {
-        toast.success("Successfully Deleted");
         reload();
+        toast.success("Successfully Deleted");
       } else toast.error("Failed to Delete");
 
+      toast.dismiss(loadingToast);
       return controller.abort();
     } catch (err) {
       console.error(err);

@@ -11,6 +11,7 @@ const BanAccount = () => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
+      const loadingId = toast.loading("Loading");
       if (
         (reason !== "" || reason !== null || reason !== undefined) &&
         (ban.email !== "" || ban.email !== null || ban.email !== undefined)
@@ -24,12 +25,17 @@ const BanAccount = () => {
         const data = response.data;
 
         if (data.ok) {
-          toast.success("User Ban Successfully");
+          toast.success(data.msg);
           ban.setEmail("");
           ban.setUserId("");
           ban.close();
-        } else toast.error("Failed to ban User");
+        } else toast.error(data.msg);
+      } else {
+        console.error("ERROR");
+        toast.error("ERROR");
       }
+
+      toast.dismiss(loadingId);
     } catch (err) {
       console.error(err);
       toast.error("ERROR");

@@ -16,6 +16,7 @@ const Updates = () => {
     e.preventDefault();
 
     try {
+      const loadingId = toast.loading("Loading");
       const response = await axios.post("/api/update", {
         comment: comment,
         postId: updates.postId,
@@ -28,6 +29,8 @@ const Updates = () => {
       } else {
         toast.error(data.msg);
       }
+
+      toast.dismiss(loadingId);
     } catch (err) {
       console.error();
 

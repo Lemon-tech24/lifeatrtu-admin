@@ -60,12 +60,13 @@ const HighRiskReports = () => {
     useInfiniteScroll((d) => getPosts(d?.skip ? d?.skip : 0, 10), {
       target: reference,
       isNoMore: (d) => d?.skip === undefined,
-      reloadDeps: [session, select],
+      reloadDeps: [session, select, ban.value],
     });
 
   const MarkDelete = async (postId: any) => {
     const controller = new AbortController();
     try {
+      const loadingId = toast.loading("Loading");
       const response = await axios.post("/api/delete", {
         postId: postId,
         signal: controller.signal,
@@ -74,9 +75,11 @@ const HighRiskReports = () => {
       const data = response.data;
 
       if (data.ok) {
-        toast.success("Successfully Deleted");
         reload();
+        toast.success("Successfully Deleted");
       } else toast.error("Failed to Delete");
+
+      toast.dismiss(loadingId);
 
       return controller.abort();
     } catch (err) {

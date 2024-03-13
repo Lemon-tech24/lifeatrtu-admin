@@ -21,13 +21,6 @@ export async function POST(request: NextRequest) {
               },
             },
           },
-          user: {
-            NOT: {
-              blacklists: {
-                some: {},
-              },
-            },
-          },
         },
         select: {
           reports: true,
