@@ -3,7 +3,7 @@ import React, { useState, useRef } from "react";
 import { useInfiniteScroll } from "ahooks";
 import { useSession } from "next-auth/react";
 import axios from "axios";
-import Skeleton from "./ui/Skeleton";
+import Skeleton from "./UI/Skeleton";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import moment from "moment";
 import { CgProfile } from "react-icons/cg";
