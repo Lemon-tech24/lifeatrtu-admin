@@ -3,7 +3,7 @@ import React, { useState, useRef } from "react";
 import { useInfiniteScroll } from "ahooks";
 import { useSession } from "next-auth/react";
 import axios from "axios";
-import Skeleton from "./UI/Skeleton";
+import Skeleton from "./ui/Skeleton";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import moment from "moment";
 import { CgProfile } from "react-icons/cg";
@@ -65,8 +65,8 @@ const PendingDelete = () => {
 
   const approveDelete = async (postId: any) => {
     const controller = new AbortController();
+    const loadingToast = toast.loading("Deleting");
     try {
-      const loadingToast = toast.loading("Deleting");
       const response = await axios.post("/api/delete", {
         postId: postId,
         signal: controller.signal,
@@ -76,16 +76,21 @@ const PendingDelete = () => {
 
       if (data.ok) {
         reload();
+        toast.dismiss(loadingToast);
         toast.success("Successfully Deleted");
-      } else toast.error("Failed to Delete");
+      } else {
+        toast.dismiss(loadingToast);
+        toast.error("Failed to Delete");
+      }
 
-      toast.dismiss(loadingToast);
       return controller.abort();
     } catch (err) {
       console.error(err);
+      toast.dismiss(loadingToast);
       toast.error("ERROR");
     }
   };
+
   return (
     <>
       <div className="w-full flex items-center justify-end p-6">

@@ -18,6 +18,7 @@ const LoginForm = () => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setDisabled(true);
+    const loadingId = toast.loading("Loading...");
     if (userInfo && userInfo.username !== "" && userInfo.password !== "") {
       try {
         const res = await signIn("credentials", {
@@ -27,12 +28,15 @@ const LoginForm = () => {
         });
 
         if (res && res.ok && !res.error) {
+          toast.dismiss(loadingId);
           toast.success("Successfully Logged In");
           setLoggedIn(true);
         } else {
+          toast.dismiss(loadingId);
           toast.error("Invalid Username or Password");
         }
       } catch (error) {
+        toast.dismiss(loadingId);
         toast.error("An error occurred while logging in");
         console.error("Login error:", error);
       } finally {

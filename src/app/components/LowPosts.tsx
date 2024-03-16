@@ -18,7 +18,7 @@ import moment from "moment";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import axios from "axios";
-import Skeleton from "./UI/Skeleton";
+import Skeleton from "./ui/Skeleton";
 
 const LowPosts = ({
   data,
@@ -36,6 +36,7 @@ const LowPosts = ({
   const ban = isOpenBanAccount();
 
   const requestDelete = async (postId: string) => {
+    const loadingId = toast.loading("Requesting...");
     try {
       const response = await axios.post("/api/request/delete", {
         postId: postId,
@@ -53,15 +54,22 @@ const LowPosts = ({
           });
           return { ...currentData, list: updatedList };
         });
+
+        toast.dismiss(loadingId);
         toast.success("Request to Delete Success");
-      } else toast.error("Request to Delete Failed");
+      } else {
+        toast.dismiss(loadingId);
+        toast.error("Request to Delete Failed");
+      }
     } catch (err) {
       console.error(err);
       toast.error("ERROR");
     }
   };
+
   const MarkDelete = async (postId: any) => {
     const controller = new AbortController();
+    const loadingId = toast.loading("Deleting...");
     try {
       const response = await axios.post("/api/delete", {
         postId: postId,
@@ -71,13 +79,18 @@ const LowPosts = ({
       const data = response.data;
 
       if (data.ok) {
+        toast.dismiss(loadingId);
         toast.success("Successfully Deleted");
         reload();
-      } else toast.error("Failed to Delete");
+      } else {
+        toast.dismiss(loadingId);
+        toast.error("Failed to Delete");
+      }
 
       return controller.abort();
     } catch (err) {
       console.error(err);
+      toast.dismiss(loadingId);
       toast.error("ERROR");
     }
   };

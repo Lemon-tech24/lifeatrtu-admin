@@ -5,7 +5,7 @@ import React, { useRef, useState } from "react";
 import { useInfiniteScroll } from "ahooks";
 import { useSession } from "next-auth/react";
 
-import Skeleton from "./UI/Skeleton";
+import Skeleton from "./ui/Skeleton";
 import { CgProfile } from "react-icons/cg";
 import moment from "moment";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
@@ -65,8 +65,8 @@ const HighRiskReports = () => {
 
   const MarkDelete = async (postId: any) => {
     const controller = new AbortController();
+    const loadingId = toast.loading("Deleting...");
     try {
-      const loadingId = toast.loading("Loading");
       const response = await axios.post("/api/delete", {
         postId: postId,
         signal: controller.signal,
@@ -76,14 +76,17 @@ const HighRiskReports = () => {
 
       if (data.ok) {
         reload();
+        toast.dismiss(loadingId);
         toast.success("Successfully Deleted");
-      } else toast.error("Failed to Delete");
-
-      toast.dismiss(loadingId);
+      } else {
+        toast.dismiss(loadingId);
+        toast.error("Failed to Delete");
+      }
 
       return controller.abort();
     } catch (err) {
       console.error(err);
+      toast.dismiss(loadingId);
       toast.error("ERROR");
     }
   };

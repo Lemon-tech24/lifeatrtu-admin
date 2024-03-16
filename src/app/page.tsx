@@ -13,6 +13,7 @@ export default async function Home() {
     <main className="flex min-h-screen w-full items-center justify-center md:flex-col md:gap-8">
       <div className="w-1/2 h-full flex items-center justify-center md:w-full">
         <div className="flex w-full items-center justify-center flex-col">
+          <div className="font-bold text-7xl xs:text-5xl">Welcome</div>
           <div className="flex items-center justify-center gap-1 xxs:flex-wrap">
             <div
               className="text-4xl xs:text-3xl bg-slate-300 rounded-2xl px-2 pl- pr-0 flex items-center justify-center leading-snug"
@@ -30,8 +31,6 @@ export default async function Home() {
               RTU
             </div>
           </div>
-          {/* ------------------------------------------------ */}
-          <div className="font-bold text-7xl xs:text-5xl">Welcome</div>
         </div>
       </div>
       <div className="w-1/2 h-full flex items-center justify-center flex-col md:w-full">

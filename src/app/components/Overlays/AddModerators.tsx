@@ -3,7 +3,6 @@ import React, { use, useEffect, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { createModerator } from "@/app/actions/createMods";
 import toast from "react-hot-toast";
-import { stat } from "fs";
 
 const AddModerators = () => {
   const addMods = isOpenAddModerators();
@@ -63,7 +62,7 @@ const AddModerators = () => {
       setIsValid(false);
       setSame(false);
     }
-  }, [state, pending]);
+  }, [state]);
 
   return (
     <div className="fixed top-0 left-0 w-full h-screen bg-slate-500/80 z-50 flex items-center justify-center">

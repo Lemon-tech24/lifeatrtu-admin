@@ -10,8 +10,9 @@ const BanAccount = () => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    const controller = new AbortController();
+    const loadingId = toast.loading("Banning User...");
     try {
-      const loadingId = toast.loading("Loading");
       if (
         (reason !== "" || reason !== null || reason !== undefined) &&
         (ban.email !== "" || ban.email !== null || ban.email !== undefined)
@@ -20,24 +21,31 @@ const BanAccount = () => {
           userId: ban.userId,
           reason: reason,
           email: ban.email,
+          signal: controller.signal,
         });
 
         const data = response.data;
 
         if (data.ok) {
+          toast.dismiss(loadingId);
           toast.success(data.msg);
           ban.setEmail("");
           ban.setUserId("");
           ban.close();
-        } else toast.error(data.msg);
+        } else {
+          toast.dismiss(loadingId);
+          toast.error(data.msg);
+        }
       } else {
         console.error("ERROR");
+        toast.dismiss(loadingId);
         toast.error("ERROR");
       }
 
-      toast.dismiss(loadingId);
+      return controller.abort();
     } catch (err) {
       console.error(err);
+      toast.dismiss(loadingId);
       toast.error("ERROR");
     }
   };
