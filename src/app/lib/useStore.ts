@@ -203,3 +203,15 @@ export const isOpenBanAccount = create<BanAccount>((set) => ({
     set(() => ({ email: data }));
   },
 }));
+
+//-------------- Ban users
+export const isOpenBanUsers = create<isOpen>((set) => ({
+  value: false,
+  close: () => {
+    set(() => ({ value: false }));
+  },
+
+  open: () => {
+    set(() => ({ value: true }));
+  },
+}));

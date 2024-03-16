@@ -10,12 +10,16 @@ import {
   ResponsiveContainer,
   Rectangle,
   LabelList,
+  PieChart,
+  Pie,
 } from "recharts";
 import React, { useState } from "react";
 import { useSession } from "next-auth/react";
 import axios from "axios";
 
 import { useRequest } from "ahooks";
+import BarGraph from "./BarGraph";
+import PieGraph from "./PieGraph";
 
 const error = console.error;
 console.error = (...args: any) => {
@@ -23,42 +27,9 @@ console.error = (...args: any) => {
   error(...args);
 };
 
-const CustomLegend = ({ payload }: any) => {
-  return (
-    <ul
-      style={{
-        listStyle: "none",
-        padding: 0,
-        display: "flex",
-        flex: "flex-column",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      {payload.map((entry: any, index: any) => (
-        <li
-          key={`legend-${index}`}
-          style={{ marginLeft: "100px", marginRight: "100px" }}
-          className="flex items-center gap-1"
-        >
-          <span
-            style={{
-              backgroundColor: entry.color,
-            }}
-            className="w-10 h-20 inline-block rounded-3xl"
-          ></span>
-          <span className="font-semibold text-xl">
-            {entry.value === "highRisk" ? "High Risk" : "Low Risk"}
-          </span>
-        </li>
-      ))}
-    </ul>
-  );
-};
-
 const DashboardHome = () => {
   const { data: session, status } = useSession();
-
+  const [graph, setGraph] = useState<string>("bar");
   const [selected, setSelected] = useState<string>("");
 
   const getReportsData = async () => {
@@ -143,6 +114,49 @@ const DashboardHome = () => {
     refreshDeps: [session, selected],
   });
 
+  const getReportCounts = async () => {
+    const { start, end } = generateDateRanges(selected);
+    try {
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const data01 = [
+    {
+      name: "Group A",
+      value: 1,
+    },
+    {
+      name: "Group B",
+      value: 3,
+    },
+    {
+      name: "Group C",
+      value: 6,
+    },
+    {
+      name: "Group D",
+      value: 2,
+    },
+    {
+      name: "Group E",
+      value: 5,
+    },
+    {
+      name: "Group F",
+      value: 9,
+    },
+    {
+      name: "Group G",
+      value: 4,
+    },
+    {
+      name: "Group H",
+      value: 7,
+    },
+  ];
+
   return (
     <>
       <select
@@ -160,64 +174,34 @@ const DashboardHome = () => {
       <div className="text-7xl font-bold w-full p-10 text-center">
         Life@RTU REPORT
       </div>
+
+      <div className="w-full flex items-center justify-center gap-8">
+        <button
+          type="button"
+          className="w-1/5 font-semibold shadow-sm px-2 rounded-xl bg-slate-300 text-xl"
+          onClick={() => setGraph("bar")}
+        >
+          High/Low Risk Reports
+        </button>
+        <button
+          type="button"
+          className="w-1/5 font-semibold shadow-sm px-2 rounded-xl bg-slate-300 text-xl"
+          onClick={() => setGraph("pie")}
+        >
+          Reports
+        </button>
+      </div>
       <div
-        className={`flex-grow ${(loading || data?.length === 0) && "flex w-full h-full items-center justify-center"}`}
+        className={`flex-grow ${(loading || data?.length === 0) && "flex w-full h-full items-center justify-center"} z-50`}
       >
         {loading ? (
           <div className="loading loading-dots w-20"></div>
         ) : data && data.length === 0 ? (
           <div className="text-2xl font-semibold">No Reports to Display</div>
+        ) : graph !== "" && graph === "bar" ? (
+          <BarGraph data={data} />
         ) : (
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              width={500}
-              height={300}
-              data={data}
-              margin={{
-                top: 20,
-                right: 30,
-                left: 20,
-                bottom: 5,
-              }}
-            >
-              <CartesianGrid
-                strokeDasharray="0"
-                strokeWidth={3}
-                color="black"
-                vertical={false}
-              />
-              <XAxis dataKey="date" />
-              <YAxis allowDecimals={false} tickCount={10} />
-
-              <Legend align="center" content={<CustomLegend />} />
-              <Bar
-                dataKey="lowRisk"
-                fill="blue"
-                activeBar={<Rectangle fill="pink" stroke="blue" />}
-                radius={[20, 20, 0, 0]}
-              >
-                <LabelList
-                  dataKey="lowRisk"
-                  position={"top"}
-                  fontSize={20}
-                  fontWeight={"bold"}
-                />
-              </Bar>
-              <Bar
-                dataKey="highRisk"
-                fill="red"
-                activeBar={<Rectangle fill="pink" stroke="blue" />}
-                radius={[20, 20, 0, 0]}
-              >
-                <LabelList
-                  dataKey="highRisk"
-                  position={"top"}
-                  fontSize={20}
-                  fontWeight={"bold"}
-                />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <PieGraph data={data01} />
         )}
       </div>
     </>

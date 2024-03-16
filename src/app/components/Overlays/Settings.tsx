@@ -1,5 +1,6 @@
 import {
   isOpenAddModerators,
+  isOpenBanUsers,
   isOpenExportData,
   isOpenModerators,
   isOpenSettings,
@@ -11,6 +12,7 @@ const Settings = () => {
   const mods = isOpenModerators();
   const addMods = isOpenAddModerators();
   const exportData = isOpenExportData();
+  const banUsers = isOpenBanUsers();
   return (
     <div className="fixed top-0 left-0 w-full h-screen bg-slate-500/80 z-50 flex items-center justify-center">
       <div
@@ -53,6 +55,17 @@ const Settings = () => {
           }}
         >
           Export Data
+        </button>
+        {/* ------------------------------------------------------ */}
+        <button
+          type="button"
+          className="w-full bg-white p-2 rounded-lg text-2xl"
+          onClick={() => {
+            settings.close();
+            banUsers.open();
+          }}
+        >
+          Banned Users
         </button>
         {/* ------------------------------------------------------ */}
         <div className="w-full flex items-center justify-center">

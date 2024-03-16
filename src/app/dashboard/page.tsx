@@ -11,6 +11,7 @@ import LowRiskReports from "../components/LowRiskReports";
 import {
   isOpenAddModerators,
   isOpenBanAccount,
+  isOpenBanUsers,
   isOpenExportData,
   isOpenImage,
   isOpenModerators,
@@ -28,6 +29,7 @@ import Reports from "../components/Overlays/Reports";
 import PendingDelete from "../components/PendingDelete";
 import HighRiskReports from "../components/HighRiskReports";
 import BanAccount from "../components/BanAccount";
+import BanUsers from "../components/Overlays/BanUsers";
 
 const Page = () => {
   const router = useRouter();
@@ -76,6 +78,7 @@ const Page = () => {
   const image = isOpenImage();
   const report = isOpenReport();
   const ban = isOpenBanAccount();
+  const banUsers = isOpenBanUsers();
 
   return status === "loading" ? (
     <div className="flex items-center justify-center w-full min-h-screen gap-4">
@@ -91,6 +94,7 @@ const Page = () => {
       {image.value && <ImagePost />}
       {report.value && <Reports />}
       {ban.value && <BanAccount />}
+      {banUsers.value && <BanUsers />}
 
       <div className="flex">
         <div className="relative w-1/5 bg-slate-300 min-h-screen">
