@@ -5,7 +5,7 @@ import React, { useRef, useState } from "react";
 import { useInfiniteScroll } from "ahooks";
 import { useSession } from "next-auth/react";
 
-import Skeleton from "./ui/Skeleton";
+import Skeleton from "@/app/components/ui/Skeleton";
 import { CgProfile } from "react-icons/cg";
 import moment from "moment";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";

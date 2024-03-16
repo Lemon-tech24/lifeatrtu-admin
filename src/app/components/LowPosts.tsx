@@ -18,7 +18,7 @@ import moment from "moment";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import axios from "axios";
-import Skeleton from "./ui/Skeleton";
+import Skeleton from "@/app/components/ui/Skeleton";
 
 const LowPosts = ({
   data,
