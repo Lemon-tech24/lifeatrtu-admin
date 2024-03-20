@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { signIn } from "next-auth/react";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
@@ -14,6 +14,7 @@ const LoginForm = () => {
     password: "",
   });
   const [loggedIn, setLoggedIn] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -32,10 +33,20 @@ const LoginForm = () => {
           toast.success("Successfully Logged In");
           setLoggedIn(true);
         } else {
+          setUserInfo({
+            username: "",
+            password: "",
+          });
+          formRef.current && formRef.current.reset();
           toast.dismiss(loadingId);
           toast.error("Invalid Username or Password");
         }
       } catch (error) {
+        setUserInfo({
+          username: "",
+          password: "",
+        });
+        formRef.current && formRef.current.reset();
         toast.dismiss(loadingId);
         toast.error("An error occurred while logging in");
         console.error("Login error:", error);
@@ -57,6 +68,7 @@ const LoginForm = () => {
       <form
         onSubmit={handleSubmit}
         className="flex flex-col w-8/12 m-auto gap-5 xs:w-11/12"
+        ref={formRef}
       >
         <input
           type="text"

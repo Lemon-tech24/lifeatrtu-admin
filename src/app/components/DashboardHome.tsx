@@ -136,7 +136,6 @@ const DashboardHome = () => {
     refreshDeps: [session, selected],
   });
 
-  console.log(counts.data);
   return (
     <>
       <select
