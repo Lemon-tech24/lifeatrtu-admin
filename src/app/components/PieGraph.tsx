@@ -9,15 +9,50 @@ import {
 } from "recharts";
 
 const COLORS = [
-  "blue",
-  "green",
-  "orange",
-  "red",
-  "purple",
-  "pink",
-  "cyan",
-  "yellow",
+  "#637A9F",
+  "#FFF3CF",
+  "#FFE7CC",
+  "#FBD1B7",
+  "#C9D7DD",
+  "#E8C872",
+  "#FFE9AE",
+  "#ED9761",
 ];
+
+const CustomLegend = ({ payload }: any) => {
+  const firstRowData = payload.slice(0, 4);
+  const secondRowData = payload.slice(4);
+  return (
+    <div className="flex justify-center flex-col border border-black border-solid w-4/6 p-4 m-auto rounded-2xl mb-2">
+      <div className="w-full flex items-center justify-evenly">
+        {firstRowData.map((entry: any, index: number) => (
+          <div key={`legend-${index}`} className="w-48 flex items-center gap-2">
+            <span
+              style={{
+                backgroundColor: entry.color,
+              }}
+              className="rounded-full w-4 h-4"
+            ></span>
+            <div className="font-semibold text-lg">{entry.value}</div>
+          </div>
+        ))}
+      </div>
+      <div className="w-full flex items-center justify-evenly">
+        {secondRowData.map((entry: any, index: number) => (
+          <div key={`legend-${index}`} className="w-48 flex items-center gap-2">
+            <span
+              style={{
+                backgroundColor: entry.color,
+              }}
+              className="rounded-full w-4 h-4"
+            ></span>
+            <div className="font-semibold text-lg">{entry.value}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const PieGraph = ({ data }: any) => {
   const renderCustomizedLabel = ({
@@ -30,6 +65,10 @@ const PieGraph = ({ data }: any) => {
     name,
     percent,
   }: any) => {
+    if (percent === 0) {
+      return null;
+    }
+
     const RADIAN = Math.PI / 180;
     const radius = 1.2 * outerRadius;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -50,6 +89,14 @@ const PieGraph = ({ data }: any) => {
       </text>
     );
   };
+  const legendData = data.map((entry: any, index: number) => ({
+    value: entry.name,
+    type: "circle",
+    color: COLORS[index % COLORS.length],
+  }));
+
+  const firstRowData = legendData.slice(0, 4);
+  const secondRowData = legendData.slice(4, 8);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -59,7 +106,7 @@ const PieGraph = ({ data }: any) => {
           cx="50%"
           cy="50%"
           labelLine={false}
-          outerRadius={250}
+          outerRadius={220}
           fill="#8884d8"
           dataKey="value"
           label={renderCustomizedLabel}
@@ -75,7 +122,7 @@ const PieGraph = ({ data }: any) => {
             props.payload.percent,
           ]}
         />
-        <Legend />
+        <Legend content={<CustomLegend />} />
       </PieChart>
     </ResponsiveContainer>
   );

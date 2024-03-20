@@ -117,46 +117,26 @@ const DashboardHome = () => {
   const getReportCounts = async () => {
     const { start, end } = generateDateRanges(selected);
     try {
+      const response = await axios.post("/api/reports/read/count", {
+        start: start,
+        end: end,
+      });
+
+      const resData = response.data;
+
+      if (resData.ok) {
+        return resData.pieData;
+      }
     } catch (err) {
       console.error(err);
     }
   };
 
-  const data01 = [
-    {
-      name: "Group A",
-      value: 1,
-    },
-    {
-      name: "Group B",
-      value: 3,
-    },
-    {
-      name: "Group C",
-      value: 6,
-    },
-    {
-      name: "Group D",
-      value: 2,
-    },
-    {
-      name: "Group E",
-      value: 5,
-    },
-    {
-      name: "Group F",
-      value: 9,
-    },
-    {
-      name: "Group G",
-      value: 4,
-    },
-    {
-      name: "Group H",
-      value: 7,
-    },
-  ];
+  const counts = useRequest(getReportCounts, {
+    refreshDeps: [session, selected],
+  });
 
+  console.log(counts.data);
   return (
     <>
       <select
@@ -178,21 +158,21 @@ const DashboardHome = () => {
       <div className="w-full flex items-center justify-center gap-8">
         <button
           type="button"
-          className="w-1/5 font-semibold shadow-sm px-2 rounded-xl bg-slate-300 text-xl"
+          className={`w-1/5 font-semibold shadow-md px-2 rounded-xl text-xl ${graph !== "" && graph === "bar" ? "bg-slate-300 animate-fadeIn" : "border border-black border-solid animate-fadeIn"}`}
           onClick={() => setGraph("bar")}
         >
           High/Low Risk Reports
         </button>
         <button
           type="button"
-          className="w-1/5 font-semibold shadow-sm px-2 rounded-xl bg-slate-300 text-xl"
+          className={`w-1/5 font-semibold shadow-md px-2 rounded-xl  text-xl  ${graph !== "" && graph === "pie" ? "bg-slate-300 animate-fadeIn" : "border border-black border-solid animate-fadeIn"}`}
           onClick={() => setGraph("pie")}
         >
           Reports
         </button>
       </div>
       <div
-        className={`flex-grow ${(loading || data?.length === 0) && "flex w-full h-full items-center justify-center"} z-50`}
+        className={`flex-grow ${(loading || data?.length === 0) && "flex w-full h-full items-center justify-center"}`}
       >
         {loading ? (
           <div className="loading loading-dots w-20"></div>
@@ -201,7 +181,7 @@ const DashboardHome = () => {
         ) : graph !== "" && graph === "bar" ? (
           <BarGraph data={data} />
         ) : (
-          <PieGraph data={data01} />
+          <PieGraph data={counts.data} />
         )}
       </div>
     </>

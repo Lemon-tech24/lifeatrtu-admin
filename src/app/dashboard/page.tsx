@@ -8,6 +8,8 @@ import { useSession } from "next-auth/react";
 import { redirect, useRouter } from "next/navigation";
 import DashboardHome from "../components/DashboardHome";
 import LowRiskReports from "../components/LowRiskReports";
+import { IoMenu } from "react-icons/io5";
+import { slide as Menu } from "react-burger-menu";
 import {
   isOpenAddModerators,
   isOpenBanAccount,
@@ -40,6 +42,8 @@ const Page = () => {
     },
   });
 
+  const [open, setOpen] = useState<boolean>(false);
+
   const [selectedButton, setSelectedButton] = useState<string>(
     session?.user.role === "mod" ? "high risk report" : "dashboard"
   );
@@ -70,6 +74,14 @@ const Page = () => {
     }
   };
 
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   const settings = isOpenSettings();
   const mods = isOpenModerators();
   const addMods = isOpenAddModerators();
@@ -86,6 +98,12 @@ const Page = () => {
     </div>
   ) : (
     <>
+      <button
+        className="absolute top-2 left-4 text-5xl hidden lg:block cursor-pointer z-10"
+        onClick={handleOpen}
+      >
+        <IoMenu />
+      </button>
       {settings.value && <Settings />}
       {mods.value && <Moderators />}
       {addMods.value && <AddModerators />}
@@ -97,8 +115,32 @@ const Page = () => {
       {banUsers.value && <BanUsers />}
 
       <div className="flex">
-        <div className="relative w-1/5 bg-slate-300 min-h-screen">
-          <div className="flex items-center justify-center gap-1 my-28">
+        <Menu
+          className="bg-slate-300 lg:w-full"
+          isOpen={open}
+          onOpen={handleOpen}
+          customBurgerIcon={false}
+          onClose={handleClose}
+        >
+          <button onClick={handleClose}>close</button>
+
+          {buttons.map((item: any, key: any) => {
+            return (
+              <button
+                key={key}
+                className={`text-2xl font-semibold hover:bg-slate-400 hover:text-white duration-700 ${item.toLowerCase() === selectedButton && "bg-slate-400 text-white"}`}
+                onClick={() => {
+                  setSelectedButton(item.toLowerCase());
+                }}
+                disabled={status !== "authenticated" ? true : false}
+              >
+                {item}
+              </button>
+            );
+          })}
+        </Menu>
+        <div className="relative w-1/5 bg-slate-300 min-h-screen lg:hidden">
+          <div className="flex items-center justify-center gap-1 my-28 flex-wrap">
             <div
               className="text-4xl  rounded-2xl px-2 pl- pr-0 flex items-center justify-center leading-normal"
               style={{ letterSpacing: "0.2em" }}
@@ -158,7 +200,7 @@ const Page = () => {
         </div>
 
         <div
-          className={`relative w-4/5 min-h-screen flex flex-col`}
+          className={`relative w-4/5 min-h-screen flex flex-col lg:w-full`}
           style={{
             backgroundImage:
               selectedButton === "low risk report" ||

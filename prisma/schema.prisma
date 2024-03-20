@@ -23,11 +23,13 @@ model Update {
 }
 
 model Blacklist {
-  id     String @id @default(uuid()) @map("_id")
-  reason String
-  User   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  email  String @unique
-  userId String @db.String
+  id         String  @id @default(uuid()) @map("_id")
+  reason     String
+  User       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email      String  @unique
+  userId     String  @db.String
+  periodTime Int
+  permanent  Boolean
 }
 
 // --------------------------------------------------------------------------------
