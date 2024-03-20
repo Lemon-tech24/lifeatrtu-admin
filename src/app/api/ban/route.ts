@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
           userId: userId,
           reason: reason,
           email: email,
-          periodTime: startingTime,
+          periodTime: periodMilliseconds,
           permanent: perma,
         },
       });
