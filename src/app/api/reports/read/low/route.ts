@@ -22,6 +22,12 @@ export async function POST(request: NextRequest) {
               },
             },
           },
+
+          reports: {
+            some: {
+              disregard: false,
+            },
+          },
         },
         include: {
           _count: {
@@ -40,7 +46,7 @@ export async function POST(request: NextRequest) {
           },
           reports: {
             select: {
-              reason: true,
+              reasons: true,
             },
           },
         },
@@ -57,8 +63,8 @@ export async function POST(request: NextRequest) {
           post._count.reports > 0 &&
           post._count.reports < 20 &&
           !post.reports.some((report) =>
-            ["violence", "suicidal or self injury", "harassment"].includes(
-              report.reason,
+            ["violence", "suicidal or self injury", "harassment"].some(
+              (reason) => report.reasons.includes(reason),
             ),
           ),
       );

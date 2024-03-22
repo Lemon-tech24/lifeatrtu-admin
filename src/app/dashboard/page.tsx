@@ -3,7 +3,7 @@
 "use client";
 
 import { signOut } from "next-auth/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { redirect, useRouter } from "next/navigation";
 import DashboardHome from "../components/DashboardHome";
@@ -11,6 +11,7 @@ import LowRiskReports from "../components/LowRiskReports";
 import { IoMenu } from "react-icons/io5";
 import { slide as Menu } from "react-burger-menu";
 import {
+  BanCountDown,
   isOpenAddModerators,
   isOpenBanAccount,
   isOpenBanUsers,
@@ -32,6 +33,7 @@ import PendingDelete from "../components/PendingDelete";
 import HighRiskReports from "../components/HighRiskReports";
 import BanAccount from "../components/BanAccount";
 import BanUsers from "../components/Overlays/BanUsers";
+import { CgClose } from "react-icons/cg";
 
 const Page = () => {
   const router = useRouter();
@@ -92,6 +94,10 @@ const Page = () => {
   const ban = isOpenBanAccount();
   const banUsers = isOpenBanUsers();
 
+  const banTimer = BanCountDown();
+
+  useEffect(() => {}, []);
+
   return status === "loading" ? (
     <div className="flex items-center justify-center w-full min-h-screen gap-4">
       <span className="loading loading-spinner w-20 "></span>Verifying User
@@ -99,7 +105,7 @@ const Page = () => {
   ) : (
     <>
       <button
-        className="absolute top-2 left-4 text-5xl hidden lg:block cursor-pointer z-10"
+        className="absolute top-2 left-4 text-5xl hidden lg:block cursor-pointer z-10 sm:top-1 sm:left-2 sm:text-4xl"
         onClick={handleOpen}
       >
         <IoMenu />
@@ -116,28 +122,39 @@ const Page = () => {
 
       <div className="flex">
         <Menu
-          className="bg-slate-300 lg:w-full"
+          className="bg-slate-300 hidden lg:flex lg:items-center lg:justify-center"
           isOpen={open}
           onOpen={handleOpen}
           customBurgerIcon={false}
           onClose={handleClose}
+          width={"100%"}
         >
-          <button onClick={handleClose}>close</button>
-
-          {buttons.map((item: any, key: any) => {
-            return (
-              <button
-                key={key}
-                className={`text-2xl font-semibold hover:bg-slate-400 hover:text-white duration-700 ${item.toLowerCase() === selectedButton && "bg-slate-400 text-white"}`}
-                onClick={() => {
-                  setSelectedButton(item.toLowerCase());
-                }}
-                disabled={status !== "authenticated" ? true : false}
-              >
-                {item}
-              </button>
-            );
-          })}
+          <div
+            className="relative w-full h-full items-center justify-center flex-col gap-20"
+            style={{ display: "flex" }}
+          >
+            <button
+              onClick={handleClose}
+              className=" text-2xl absolute top-2 right-2"
+            >
+              <CgClose />
+            </button>
+            {buttons.map((item: any, key: any) => {
+              return (
+                <button
+                  key={key}
+                  className={`w-full text-2xl font-semibold hover:bg-slate-400 hover:text-white duration-700 ${item.toLowerCase() === selectedButton && "bg-slate-400 text-white"}`}
+                  onClick={() => {
+                    handleClose();
+                    setSelectedButton(item.toLowerCase());
+                  }}
+                  disabled={status !== "authenticated" ? true : false}
+                >
+                  {item}
+                </button>
+              );
+            })}
+          </div>
         </Menu>
         <div className="relative w-1/5 bg-slate-300 min-h-screen lg:hidden">
           <div className="flex items-center justify-center gap-1 my-28 flex-wrap">
@@ -200,7 +217,7 @@ const Page = () => {
         </div>
 
         <div
-          className={`relative w-4/5 min-h-screen flex flex-col lg:w-full`}
+          className={`relative w-4/5 min-h-[97vh] flex flex-col lg:w-full`}
           style={{
             backgroundImage:
               selectedButton === "low risk report" ||

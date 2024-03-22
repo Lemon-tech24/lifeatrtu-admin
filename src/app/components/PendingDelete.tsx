@@ -135,7 +135,9 @@ const PendingDelete = () => {
                           >
                             Approve
                           </button>
-
+                          <button className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black">
+                            Disregard
+                          </button>
                           <button
                             className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
                             onClick={() => {
@@ -209,7 +211,7 @@ const PendingDelete = () => {
                               className="text-base font-semibold -mb-3"
                               style={{ color: "#CA0C0C" }}
                             >
-                              {item._count.reports} REPORTS
+                              {item.reports[0].reasons.length} REPORTS
                             </div>
                           </div>
 

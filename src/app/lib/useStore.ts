@@ -172,6 +172,15 @@ export const isMarkAsDone = create<MarkAsDone>((set) => ({
   },
 }));
 
+//------------------ Disregard
+
+export const DisregardReport = create<MarkAsDone>((set) => ({
+  postId: "",
+  setPostId: (data: any) => {
+    set(() => ({ postId: data }));
+  },
+}));
+
 //-------------- Ban Account
 
 interface BanAccount {
@@ -213,5 +222,60 @@ export const isOpenBanUsers = create<isOpen>((set) => ({
 
   open: () => {
     set(() => ({ value: true }));
+  },
+}));
+
+//--------------- Ban Account
+
+interface BanCountDown {
+  days: string;
+  startingTime: number;
+  remainingTime: number;
+  countdown: () => void;
+  setStarting: (data: any) => void;
+  setDays: (data: any) => void;
+}
+
+export const BanCountDown = create<BanCountDown>((set, get) => ({
+  days: "",
+  startingTime: 0,
+  remainingTime: 0,
+  countdown: () => {
+    const RemainingTime = () => {
+      const { startingTime } = get();
+      if (startingTime && startingTime > 0) {
+        const currentTime = new Date().getTime();
+        const remaining = Math.max(
+          0,
+          Math.floor(
+            (startingTime + Number(get().days) * 60 * 60 * 1000 - currentTime) /
+              1000,
+          ),
+        );
+
+        if (remaining === 0) {
+          set(() => ({ startingTime: 0, remainingTime: 0 }));
+        } else {
+          set((state: any) => ({ ...state, remainingTime: remaining }));
+        }
+      } else {
+        clearInterval(interval);
+        set(() => ({ remainingTime: 0 }));
+      }
+    };
+
+    RemainingTime();
+
+    const interval = setInterval(RemainingTime, 1000);
+
+    return () => clearInterval(interval);
+  },
+
+  setStarting: (data: any) => {
+    return set(() => ({ startingTime: data ? data : 0 }));
+  },
+
+  setDays: (data: any) => {
+    return set(() => ({ startingTime: data ? data : 0 }));
   },
 }));

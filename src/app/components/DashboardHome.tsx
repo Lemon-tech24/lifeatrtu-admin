@@ -139,7 +139,7 @@ const DashboardHome = () => {
   return (
     <>
       <select
-        className="absolute top-2 right-4 text-xl outline-none rounded-xl shadow-md px-2 border border-solid border-black"
+        className="absolute top-2 right-4 md:right-1 text-xl lg:text-lg md:text-base md:px-1 md:shadow-sm sm:top-1 outline-none rounded-xl shadow-md px-2 border border-solid border-black"
         disabled={status === "loading" || !session ? true : false}
         defaultValue={""}
         onChange={(e) => setSelected(e.target.value)}
@@ -150,21 +150,21 @@ const DashboardHome = () => {
         <option value="all">All Time</option>
       </select>
       {/* ------------------------------------------------ */}
-      <div className="text-7xl font-bold w-full p-10 text-center">
+      <div className="text-7xl lg:text-6xl sm:text-5xl xs:text-3xl font-bold w-full p-10 lg:p-6 md:pt-8 md:p-4 xs:p-4 xs:pt-8 text-center">
         Life@RTU REPORT
       </div>
 
-      <div className="w-full flex items-center justify-center gap-8">
+      <div className="w-full flex items-center justify-center gap-4 md:px-2">
         <button
           type="button"
-          className={`w-1/5 font-semibold shadow-md px-2 rounded-xl text-xl ${graph !== "" && graph === "bar" ? "bg-slate-300 animate-fadeIn" : "border border-black border-solid animate-fadeIn"}`}
+          className={`w-1/5 2xl:w-2/5 md:w-3/5 sm:text-base xs:text-xs font-semibold shadow-md px-2 rounded-xl text-xl ${graph !== "" && graph === "bar" ? "bg-slate-300 animate-fadeIn" : "border border-black border-solid animate-fadeIn"}`}
           onClick={() => setGraph("bar")}
         >
           High/Low Risk Reports
         </button>
         <button
           type="button"
-          className={`w-1/5 font-semibold shadow-md px-2 rounded-xl  text-xl  ${graph !== "" && graph === "pie" ? "bg-slate-300 animate-fadeIn" : "border border-black border-solid animate-fadeIn"}`}
+          className={`w-1/5 2xl:w-2/5 md:w-3/5 sm:text-base xs:text-xs font-semibold shadow-md px-2 rounded-xl  text-xl  ${graph !== "" && graph === "pie" ? "bg-slate-300 animate-fadeIn" : "border border-black border-solid animate-fadeIn"}`}
           onClick={() => setGraph("pie")}
         >
           Reports
@@ -176,7 +176,9 @@ const DashboardHome = () => {
         {loading ? (
           <div className="loading loading-dots w-20"></div>
         ) : data && data.length === 0 ? (
-          <div className="text-2xl font-semibold">No Reports to Display</div>
+          <div className="text-2xl font-semibold sm:text-base">
+            No Reports to Display
+          </div>
         ) : graph !== "" && graph === "bar" ? (
           <BarGraph data={data} />
         ) : (

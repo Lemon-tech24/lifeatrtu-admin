@@ -103,7 +103,8 @@ model Report {
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   userId    String   @db.String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  reason    String
+  reasons   String[]
+  disregard Boolean
   createdAt DateTime @default(now())
 }
 

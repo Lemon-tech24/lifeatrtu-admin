@@ -15,98 +15,105 @@ export async function POST(request: NextRequest) {
 
       reportCounts["Hate Speech"] = await prisma.report.count({
         where: {
-          reason: {
-            equals: "hate speech",
+          reasons: {
+            has: "hate speech",
           },
-
           createdAt: {
             gte: start,
             lte: end,
           },
+          disregard: false,
         },
       });
 
       reportCounts["False Information"] = await prisma.report.count({
         where: {
-          reason: {
-            equals: "false information",
+          reasons: {
+            has: "false information",
           },
           createdAt: {
             gte: start,
             lte: end,
           },
+          disregard: false,
         },
       });
 
       reportCounts["Harassment"] = await prisma.report.count({
         where: {
-          reason: {
-            equals: "harassment",
+          reasons: {
+            has: "harassment",
           },
           createdAt: {
             gte: start,
             lte: end,
           },
+          disregard: false,
         },
       });
 
       reportCounts["Nudity"] = await prisma.report.count({
         where: {
-          reason: {
-            equals: "nudity",
+          reasons: {
+            has: "nudity",
           },
           createdAt: {
             gte: start,
             lte: end,
           },
+          disregard: false,
         },
       });
 
       reportCounts["Spam"] = await prisma.report.count({
         where: {
-          reason: {
-            equals: "spam",
+          reasons: {
+            has: "spam",
           },
           createdAt: {
             gte: start,
             lte: end,
           },
+          disregard: false,
         },
       });
 
       reportCounts["Suicidal"] = await prisma.report.count({
         where: {
-          reason: {
-            equals: "suicidal or self injury",
+          reasons: {
+            has: "suicidal or self injury",
           },
           createdAt: {
             gte: start,
             lte: end,
           },
+          disregard: false,
         },
       });
 
       reportCounts["Violence"] = await prisma.report.count({
         where: {
-          reason: {
-            equals: "violence",
+          reasons: {
+            has: "violence",
           },
           createdAt: {
             gte: start,
             lte: end,
           },
+          disregard: false,
         },
       });
 
       reportCounts["Something Else"] = await prisma.report.count({
         where: {
-          reason: {
-            equals: "something else",
+          reasons: {
+            has: "something else",
           },
           createdAt: {
             gte: start,
             lte: end,
           },
+          disregard: false,
         },
       });
 
@@ -116,8 +123,9 @@ export async function POST(request: NextRequest) {
       }));
 
       return NextResponse.json({ ok: true, pieData: list });
-    } else
+    } else {
       return NextResponse.json({ message: "UNAUTHORIZED" }, { status: 401 });
+    }
   } catch (err) {
     throw new Error("Error");
   }

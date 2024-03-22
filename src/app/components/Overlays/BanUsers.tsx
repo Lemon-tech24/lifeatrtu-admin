@@ -1,8 +1,14 @@
-import { isOpenBanUsers, isOpenSettings } from "@/app/lib/useStore";
+import { formatTimeDays, getRemainingTime } from "@/app/lib/FormatTime";
+
+import {
+  BanCountDown,
+  isOpenBanUsers,
+  isOpenSettings,
+} from "@/app/lib/useStore";
 import { useRequest } from "ahooks";
 import axios from "axios";
 import { useSession } from "next-auth/react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { HiUserRemove } from "react-icons/hi";
 
@@ -11,6 +17,7 @@ const BanUsers = () => {
   const settings = isOpenSettings();
   const banUsers = isOpenBanUsers();
   const { data: session } = useSession();
+  const banTimer = BanCountDown();
 
   const getBanUsers = async () => {
     try {
@@ -52,6 +59,7 @@ const BanUsers = () => {
     setKeyword(!keyword);
   };
 
+  console.log(data);
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-slate-500/80 z-50 flex items-center justify-center">
       <div
@@ -69,7 +77,7 @@ const BanUsers = () => {
           <div className="w-full h-full overflow-y-auto">
             {!loading ? (
               data && data.length > 0 ? (
-                data.map(({ id, reason, email, userId, period }: any) => (
+                data.map(({ id, reason, email, userId, periodTime }: any) => (
                   <div
                     key={id}
                     className="flex w-full items-center justify-between"
@@ -87,7 +95,8 @@ const BanUsers = () => {
                       <div className="text-xl flex items-center">{email}</div>
                     </div>
                     <div className="w-full flex items-center justify-end pr-8 text-xl">
-                      {reason} - {period}
+                      {reason} -
+                      {formatTimeDays(getRemainingTime(periodTime, 7))}
                     </div>
                   </div>
                 ))

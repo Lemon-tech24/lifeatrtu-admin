@@ -47,7 +47,6 @@ const Updates = () => {
       const data = response.data;
 
       if (data) {
-        setKeyword(!keyword);
         return data.updates;
       }
       return data;
@@ -55,8 +54,9 @@ const Updates = () => {
       console.error();
     }
   };
+
   const { data, loading } = useRequest(getUpdates, {
-    refreshDeps: [session, keyword],
+    refreshDeps: [session],
   });
 
   return (
@@ -78,7 +78,7 @@ const Updates = () => {
         <div className="w-full overflow-auto flex gap-2 flex-col items-center px-16">
           {loading ? (
             <div className="loading loading-dots w-16"></div>
-          ) : data && data.updates.length !== 0 ? (
+          ) : data && data.updates.length > 0 ? (
             data.updates.map((item: any, key: number) => {
               return (
                 <div className="bg-white rounded-xl p-4 w-full" key={key}>
@@ -100,12 +100,12 @@ const Updates = () => {
             type="text"
             placeholder="Post an update"
             name="comment"
-            className={`p-4 rounded-xl text-xl ${loading || status === "loading" ? "cursor-not-allowed" : "cursor-pointer"}`}
+            className={`p-4 rounded-xl text-xl ${loading ? "cursor-not-allowed" : "cursor-pointer"}`}
             onChange={(e) => setComment(e.target.value)}
             required
-            disabled={status === "loading" || loading ? true : false}
+            disabled={loading ? true : false}
             autoComplete="off"
-            aria-disabled={status === "loading" || loading}
+            aria-disabled={loading}
           />
         </form>
       </div>

@@ -5,28 +5,24 @@ import { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
-  const { userId, reason, email, period } = await request.json();
+  const { postId } = await request.json();
   const session = await getServerSession(authOptions);
-
-  const startingTime = Math.floor(Date.now() / 1000);
   try {
     if (session) {
-      const banUser = await prisma.blacklist.create({
+      const disregardReport = await prisma.report.updateMany({
+        where: {
+          postId: postId,
+        },
         data: {
-          userId: userId,
-          reason: reason,
-          email: email,
-          periodTime: startingTime,
-          permanent: false,
+          disregard: true,
         },
       });
 
-      if (banUser) {
-        return NextResponse.json({ ok: true, msg: "User Ban Successfully" });
-      } else return NextResponse.json({ ok: false, msg: "Failed to Ban User" });
-    } else {
+      if (disregardReport) {
+        return NextResponse.json({ ok: true });
+      } else return NextResponse.json({ ok: false });
+    } else
       return NextResponse.json({ message: "UNAUTHORIZED" }, { status: 401 });
-    }
   } catch (err) {
     throw new Error("Error");
   }

@@ -10,6 +10,7 @@ import { CgProfile } from "react-icons/cg";
 import moment from "moment";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import {
+  DisregardReport,
   isMarkAsDone,
   isOpenBanAccount,
   isOpenImage,
@@ -30,6 +31,7 @@ const HighRiskReports = () => {
   const update = isOpenUpdates();
   const markDone = isMarkAsDone();
   const ban = isOpenBanAccount();
+  const disregard = DisregardReport();
 
   const getPosts = async (skip: any, take: number) => {
     try {
@@ -91,6 +93,24 @@ const HighRiskReports = () => {
     }
   };
 
+  const Disregard = async (postId: string) => {
+    const loadingId = toast.loading("Processing...");
+    try {
+      const response = await axios.post("/api/disregard", { postId: postId });
+
+      const data = response.data;
+      toast.dismiss(loadingId);
+      if (data.ok) {
+        reload();
+        toast.success("Disregarded");
+      } else {
+        toast.error("Error Disregarding Post");
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <>
       <div className="w-full flex items-center justify-end p-6">
@@ -142,8 +162,22 @@ const HighRiskReports = () => {
                                     }
                                   }}
                                 >
-                                  Mark as Done
+                                  Delete
                                 </button>
+
+                                <button
+                                  type="button"
+                                  className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                  onClick={() => {
+                                    disregard.setPostId(item.id);
+                                    if (item.id === disregard.postId) {
+                                      Disregard(disregard.postId);
+                                    }
+                                  }}
+                                >
+                                  Disregard
+                                </button>
+
                                 <button
                                   type="button"
                                   className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
@@ -220,7 +254,7 @@ const HighRiskReports = () => {
                                 className="text-base font-semibold -mb-3"
                                 style={{ color: "#CA0C0C" }}
                               >
-                                {item._count.reports} REPORTS
+                                {item.reports[0].reasons.length} REPORTS
                               </div>
                             </div>
 

@@ -24,6 +24,12 @@ export async function POST(request: NextRequest) {
               },
             },
           },
+
+          reports: {
+            some: {
+              disregard: false,
+            },
+          },
         },
 
         include: {
@@ -36,7 +42,7 @@ export async function POST(request: NextRequest) {
           },
           reports: {
             select: {
-              reason: true,
+              reasons: true,
             },
           },
           _count: {

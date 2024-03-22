@@ -8,6 +8,7 @@ import { CgProfile } from "react-icons/cg";
 import { IoIosWarning } from "react-icons/io";
 import { FaCommentAlt } from "react-icons/fa";
 import {
+  DisregardReport,
   isMarkAsDone,
   isOpenBanAccount,
   isOpenImage,
@@ -34,6 +35,7 @@ const LowPosts = ({
   const report = isOpenReport();
   const markDone = isMarkAsDone();
   const ban = isOpenBanAccount();
+  const disregard = DisregardReport();
 
   const requestDelete = async (postId: string) => {
     const loadingId = toast.loading("Requesting...");
@@ -95,6 +97,23 @@ const LowPosts = ({
     }
   };
 
+  const Disregard = async (postId: string) => {
+    const loadingId = toast.loading("Processing...");
+    try {
+      const response = await axios.post("/api/disregard", { postId: postId });
+
+      const data = response.data;
+      toast.dismiss(loadingId);
+      if (data.ok) {
+        toast.success("Disregarded");
+      } else {
+        toast.error("Error Disregarding Post");
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <>
       <ResponsiveMasonry>
@@ -133,7 +152,18 @@ const LowPosts = ({
                               }
                             }}
                           >
-                            Mark as Done
+                            Delete
+                          </button>
+                          <button
+                            className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                            onClick={() => {
+                              disregard.setPostId(item.id);
+                              if (item.id === disregard.postId) {
+                                Disregard(disregard.postId);
+                              }
+                            }}
+                          >
+                            Disregard
                           </button>
                           <button
                             type="button"
@@ -211,7 +241,7 @@ const LowPosts = ({
                           className="text-base font-semibold -mb-3"
                           style={{ color: "#CA0C0C" }}
                         >
-                          {item._count.reports} REPORTS
+                          {item.reports[0].reasons.length} REPORTS
                         </div>
                       </div>
 

@@ -6,11 +6,9 @@ const Reports = () => {
 
   const reportCounts: any = {};
   reports.data.reports.forEach((report: any) => {
-    if (report.reason in reportCounts) {
-      reportCounts[report.reason]++;
-    } else {
-      reportCounts[report.reason] = 1;
-    }
+    report.reasons.forEach((reason: any) => {
+      reportCounts[reason] = (reportCounts[reason] || 0) + 1;
+    });
   });
 
   return (
