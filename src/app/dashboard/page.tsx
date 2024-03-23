@@ -21,6 +21,7 @@ import {
   isOpenReport,
   isOpenSettings,
   isOpenUpdates,
+  useMultipleSelect,
 } from "../lib/useStore";
 import Settings from "../components/Overlays/Settings";
 import Moderators from "../components/Overlays/Moderators";
@@ -95,6 +96,7 @@ const Page = () => {
   const banUsers = isOpenBanUsers();
 
   const banTimer = BanCountDown();
+  const selection = useMultipleSelect();
 
   useEffect(() => {}, []);
 
@@ -182,6 +184,8 @@ const Page = () => {
                   key={key}
                   className={`text-2xl font-semibold hover:bg-slate-400 hover:text-white duration-700 ${item.toLowerCase() === selectedButton && "bg-slate-400 text-white"}`}
                   onClick={() => {
+                    selection.setClose();
+                    selection.setList([]);
                     setSelectedButton(item.toLowerCase());
                   }}
                   disabled={status !== "authenticated" ? true : false}
@@ -197,7 +201,11 @@ const Page = () => {
               <button
                 type="button"
                 className="bg-gray-400 w-32 px-5 rounded-xl text-xl"
-                onClick={settings.open}
+                onClick={() => {
+                  selection.setList([]);
+                  selection.setClose();
+                  settings.open();
+                }}
               >
                 Settings
               </button>
@@ -205,11 +213,13 @@ const Page = () => {
             <button
               type="button"
               className="bg-red-500 w-32 px-5 rounded-xl text-xl"
-              onClick={() =>
+              onClick={() => {
+                selection.setList([]);
+                selection.setClose();
                 signOut({ redirect: false }).then(() => {
                   router.push("/");
-                })
-              }
+                });
+              }}
             >
               Logout
             </button>

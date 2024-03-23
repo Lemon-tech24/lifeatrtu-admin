@@ -14,6 +14,7 @@ import {
   isOpenImage,
   isOpenReport,
   isOpenUpdates,
+  useMultipleSelect,
 } from "../lib/useStore";
 import moment from "moment";
 import { useSession } from "next-auth/react";
@@ -36,6 +37,7 @@ const LowPosts = ({
   const markDone = isMarkAsDone();
   const ban = isOpenBanAccount();
   const disregard = DisregardReport();
+  const selection = useMultipleSelect();
 
   const requestDelete = async (postId: string) => {
     const loadingId = toast.loading("Requesting...");
@@ -113,7 +115,16 @@ const LowPosts = ({
       console.log(err);
     }
   };
+  const checkboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value, checked } = e.target;
+    if (checked) {
+      selection.setList([...selection.list, value]);
+    } else {
+      selection.setList(selection.list.filter((id) => id !== value));
+    }
+  };
 
+  console.log(selection.list);
   return (
     <>
       <ResponsiveMasonry>
@@ -142,40 +153,53 @@ const LowPosts = ({
                         )
                       ) : (
                         <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                            onClick={() => {
-                              markDone.setPostId(item.id);
-                              if (item.id === markDone.postId) {
-                                MarkDelete(markDone.postId);
-                              }
-                            }}
-                          >
-                            Delete
-                          </button>
-                          <button
-                            className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                            onClick={() => {
-                              disregard.setPostId(item.id);
-                              if (item.id === disregard.postId) {
-                                Disregard(disregard.postId);
-                              }
-                            }}
-                          >
-                            Disregard
-                          </button>
-                          <button
-                            type="button"
-                            className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                            onClick={() => {
-                              ban.setUserId(item.user.id);
-                              ban.setEmail(item.user.email);
-                              ban.open();
-                            }}
-                          >
-                            Ban
-                          </button>
+                          {selection.isOpen ? (
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4 accent-black"
+                              checked={selection.list.includes(item.id)}
+                              value={item.id}
+                              onChange={checkboxChange}
+                            />
+                          ) : (
+                            <>
+                              {" "}
+                              <button
+                                type="button"
+                                className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                onClick={() => {
+                                  markDone.setPostId(item.id);
+                                  if (item.id === markDone.postId) {
+                                    MarkDelete(markDone.postId);
+                                  }
+                                }}
+                              >
+                                Delete
+                              </button>
+                              <button
+                                className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                onClick={() => {
+                                  disregard.setPostId(item.id);
+                                  if (item.id === disregard.postId) {
+                                    Disregard(disregard.postId);
+                                  }
+                                }}
+                              >
+                                Disregard
+                              </button>
+                              <button
+                                type="button"
+                                className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                onClick={() => {
+                                  ban.setUserId(item.user.id);
+                                  ban.setEmail(item.user.email);
+                                  ban.open();
+                                }}
+                              >
+                                Ban
+                              </button>
+                            </>
+                          )}
                         </div>
                       )}
                     </div>

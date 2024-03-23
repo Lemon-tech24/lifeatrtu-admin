@@ -13,10 +13,12 @@ import {
   isOpenImage,
   isOpenReport,
   isOpenUpdates,
+  useMultipleSelect,
 } from "../lib/useStore";
 import { IoIosWarning } from "react-icons/io";
 import { FaCommentAlt } from "react-icons/fa";
 import toast from "react-hot-toast";
+import MultipleSelect from "./MultipleSelect";
 
 const PendingDelete = () => {
   const { data: session } = useSession();
@@ -27,6 +29,7 @@ const PendingDelete = () => {
   const update = isOpenUpdates();
   const approve = isApproveDelete();
   const ban = isOpenBanAccount();
+  const selection = useMultipleSelect();
 
   const getPosts = async (skip: any, take: number) => {
     try {
@@ -91,9 +94,23 @@ const PendingDelete = () => {
     }
   };
 
+  const checkboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value, checked } = e.target;
+    if (checked) {
+      selection.setList([...selection.list, value]);
+    } else {
+      selection.setList(selection.list.filter((id) => id !== value));
+    }
+  };
   return (
     <>
-      <div className="w-full flex items-center justify-end p-6">
+      <div className="w-full flex items-center justify-end p-6 gap-2">
+        <MultipleSelect
+          reload={reload}
+          loading={loading}
+          loadingMore={loadingMore}
+          tab={"pending"}
+        />
         <select
           className="rounded-xl px-2 text-xl border border-black border-solid shadow-lg"
           defaultValue={"most"}
@@ -121,33 +138,45 @@ const PendingDelete = () => {
                       >
                         {/* ----------------------------------------------------------------- */}
                         <div className="flex items-center justify-end gap-2">
-                          <button
-                            type="button"
-                            className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                            disabled={loading || loadingMore}
-                            onClick={() => {
-                              approve.setPostId(item.id);
+                          {selection.isOpen ? (
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4 accent-black"
+                              checked={selection.list.includes(item.id)}
+                              value={item.id}
+                              onChange={checkboxChange}
+                            />
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                disabled={loading || loadingMore}
+                                onClick={() => {
+                                  approve.setPostId(item.id);
 
-                              if (item.id === approve.postId) {
-                                approveDelete(approve.postId);
-                              }
-                            }}
-                          >
-                            Approve
-                          </button>
-                          <button className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black">
-                            Disregard
-                          </button>
-                          <button
-                            className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                            onClick={() => {
-                              ban.setEmail(item.user.email);
-                              ban.setUserId(item.user.id);
-                              ban.open();
-                            }}
-                          >
-                            Ban
-                          </button>
+                                  if (item.id === approve.postId) {
+                                    approveDelete(approve.postId);
+                                  }
+                                }}
+                              >
+                                Approve
+                              </button>
+                              <button className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black">
+                                Disregard
+                              </button>
+                              <button
+                                className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                onClick={() => {
+                                  ban.setEmail(item.user.email);
+                                  ban.setUserId(item.user.id);
+                                  ban.open();
+                                }}
+                              >
+                                Ban
+                              </button>
+                            </>
+                          )}
                         </div>
                         {/* ----------------------------------------------------------------- */}
                         <div className="font-bold text-2xl">{item.title}</div>

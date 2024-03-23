@@ -7,6 +7,7 @@ import { useInfiniteScroll } from "ahooks";
 import { useSession } from "next-auth/react";
 import LowPosts from "./LowPosts";
 import { isOpenBanAccount } from "../lib/useStore";
+import MultipleSelect from "./MultipleSelect";
 
 const LowRiskReports = () => {
   const { data: session } = useSession();
@@ -47,7 +48,13 @@ const LowRiskReports = () => {
 
   return (
     <>
-      <div className="w-full flex items-center justify-end p-6">
+      <div className="w-full flex items-center justify-end p-6 gap-2">
+        <MultipleSelect
+          reload={reload}
+          loading={loading}
+          loadingMore={loadingMore}
+          tab={"low"}
+        />
         <select
           className="rounded-xl px-2 text-xl border border-black border-solid shadow-lg"
           onChange={(e) => setSelect(e.target.value)}

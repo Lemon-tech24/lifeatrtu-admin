@@ -279,3 +279,28 @@ export const BanCountDown = create<BanCountDown>((set, get) => ({
     return set(() => ({ startingTime: data ? data : 0 }));
   },
 }));
+
+//-------------------------- Selection
+
+interface MultipleSelect {
+  list: String[];
+  isOpen: Boolean;
+  setList: (data: any) => void;
+  setOpen: () => void;
+  setClose: () => void;
+}
+export const useMultipleSelect = create<MultipleSelect>((set, get) => ({
+  list: [],
+  isOpen: false,
+  setList: (data: any) => {
+    const dataList = Array.isArray(data) ? data : [];
+    set(() => ({ list: dataList }));
+  },
+  setOpen: () => {
+    set(() => ({ isOpen: true }));
+  },
+
+  setClose: () => {
+    set(() => ({ isOpen: false }));
+  },
+}));
