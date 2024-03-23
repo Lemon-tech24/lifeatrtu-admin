@@ -148,6 +148,8 @@ const Page = () => {
                   className={`w-full text-2xl font-semibold hover:bg-slate-400 hover:text-white duration-700 ${item.toLowerCase() === selectedButton && "bg-slate-400 text-white"}`}
                   onClick={() => {
                     handleClose();
+                    selection.setList([]);
+                    selection.setClose();
                     setSelectedButton(item.toLowerCase());
                   }}
                   disabled={status !== "authenticated" ? true : false}

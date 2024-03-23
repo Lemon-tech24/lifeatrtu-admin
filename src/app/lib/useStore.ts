@@ -301,6 +301,7 @@ export const useMultipleSelect = create<MultipleSelect>((set, get) => ({
   },
 
   setClose: () => {
+    get().setList([]);
     set(() => ({ isOpen: false }));
   },
 }));
