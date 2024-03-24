@@ -36,20 +36,6 @@ const CustomLegend = ({ payload }: any) => {
 };
 
 const BarGraph = ({ data }: any) => {
-  const [width, setWidth] = useState<number>(window.innerWidth);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setWidth(window.innerWidth);
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
   return (
     <ResponsiveContainer>
       <BarChart
@@ -64,8 +50,8 @@ const BarGraph = ({ data }: any) => {
           color="black"
           vertical={false}
         />
-        <XAxis dataKey="date" />
-        <YAxis allowDecimals={false} tickCount={10} />
+        <XAxis dataKey="date" className="text-xl md:text-sm" />
+        <YAxis allowDecimals={false} tickCount={10} className="text-xl md:-" />
 
         <Legend align="center" content={<CustomLegend />} />
         <Bar
@@ -77,7 +63,7 @@ const BarGraph = ({ data }: any) => {
           <LabelList
             dataKey="lowRisk"
             position={"top"}
-            fontSize={20}
+            className="text-xl md:text-base"
             fontWeight={"bold"}
           />
         </Bar>
@@ -90,7 +76,7 @@ const BarGraph = ({ data }: any) => {
           <LabelList
             dataKey="highRisk"
             position={"top"}
-            fontSize={20}
+            className="text-xl md:text-base"
             fontWeight={"bold"}
           />
         </Bar>

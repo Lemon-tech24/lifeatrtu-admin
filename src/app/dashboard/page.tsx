@@ -158,6 +158,34 @@ const Page = () => {
                 </button>
               );
             })}
+            <div className="flex flex-col gap-1 justify-center">
+              {session.user.role !== "mod" && (
+                <button
+                  type="button"
+                  className="bg-gray-400 w-32 px-5 rounded-xl text-xl"
+                  onClick={() => {
+                    selection.setList([]);
+                    selection.setClose();
+                    settings.open();
+                  }}
+                >
+                  Settings
+                </button>
+              )}
+              <button
+                type="button"
+                className="bg-red-500 w-32 px-5 rounded-xl text-xl"
+                onClick={() => {
+                  selection.setList([]);
+                  selection.setClose();
+                  signOut({ redirect: false }).then(() => {
+                    router.push("/");
+                  });
+                }}
+              >
+                Logout
+              </button>
+            </div>
           </div>
         </Menu>
         <div className="relative w-1/5 bg-slate-300 min-h-screen lg:hidden">

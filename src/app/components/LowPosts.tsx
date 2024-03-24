@@ -21,6 +21,7 @@ import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import Skeleton from "@/app/components/UI/Skeleton";
+import { BsIncognito } from "react-icons/bs";
 
 const LowPosts = ({
   data,
@@ -225,9 +226,21 @@ const LowPosts = ({
                       </div>
 
                       <div className="text-xl font-semibold">
-                        {session?.user.role === "mod"
-                          ? item.anonymous && "Anonymous"
-                          : item.user.name}
+                        {session?.user.role === "mod" ? (
+                          item.anonymous && "Anonymous"
+                        ) : session?.user.role !== "mod" && item.anonymous ? (
+                          <div className="flex items-center gap-1">
+                            {item.user.name}
+                            <div
+                              className="text-2xl tooltip tooltip-right font-normal"
+                              data-tip="Posted as Anonymous"
+                            >
+                              <BsIncognito />
+                            </div>
+                          </div>
+                        ) : (
+                          item.user.name
+                        )}
                       </div>
                     </div>
                     {/* ----------------------------------------------------------------- */}
