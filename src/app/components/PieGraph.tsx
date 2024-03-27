@@ -95,7 +95,7 @@ const PieGraph = ({ data }: any) => {
     }
 
     const RADIAN = Math.PI / 180;
-    const radius = 1 * outerRadius;
+    const radius = 1.08 * outerRadius;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
@@ -107,11 +107,11 @@ const PieGraph = ({ data }: any) => {
         textAnchor={x > cx ? "start" : "end"}
         dominantBaseline="central"
         className="text-ellipsis line-clamp-1"
-        fontSize={width < 767 ? 10 : 14}
+        fontSize={width < 767 ? 7 : 14}
         fontWeight={700}
       >
         {name}
-        <tspan x={x} dy="1rem">
+        <tspan x={x} dy="12px">
           {`${(percent * 100).toFixed(0)}%`}
         </tspan>
       </text>

@@ -1,55 +1,86 @@
-import React, { useEffect, useRef, useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/rules-of-hooks */
+import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { isOpenBanAccount } from "../lib/useStore";
+import { useSession } from "next-auth/react";
 
 const BanAccount = () => {
   const [reason, setReason] = useState<string>("");
+  const { data: session } = useSession();
   const ban = isOpenBanAccount();
   const reference = useRef<HTMLFormElement>(null);
-  const [banPeriod, setBanPeriod] = useState<string>("1day");
+  const controllerRef = useRef(new AbortController());
+  const [banPeriod, setBanPeriod] = useState<string>("1");
+  const [disabled, setDisabled] = useState<boolean>(false);
+  const [disabledBTN, setDisabledBTN] = useState<boolean>(false);
 
-  const handleSubmit = async (e: any) => {
+  useEffect(() => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+    }
+    controllerRef.current = new AbortController();
+    return () => controllerRef.current?.abort();
+  }, [session]);
+
+  const handleSubmit = (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const controller = new AbortController();
+
     const loadingId = toast.loading("Banning User...");
-    try {
+
+    const { signal } = controllerRef.current;
+
+    if (disabled) {
+      toast.error("Please Wait");
+    }
+
+    setDisabledBTN(true);
+
+    setTimeout(() => {
+      setDisabled(true);
       if (
         (reason !== "" || reason !== null || reason !== undefined) &&
         (ban.email !== "" || ban.email !== null || ban.email !== undefined)
       ) {
-        const response = await axios.post("/api/ban", {
-          userId: ban.userId,
-          reason: reason,
-          email: ban.email,
-          period: banPeriod,
-          signal: controller.signal,
-        });
+        axios
+          .post(
+            "/api/ban",
+            {
+              userId: ban.userId,
+              reason: reason,
+              email: ban.email,
+              period: banPeriod,
+            },
+            { signal: signal }
+          )
+          .then((response) => {
+            const data = response.data;
 
-        const data = response.data;
-
-        if (data.ok) {
-          toast.dismiss(loadingId);
-          toast.success(data.msg);
-          ban.setEmail("");
-          ban.setUserId("");
-          ban.close();
-        } else {
-          toast.dismiss(loadingId);
-          toast.error(data.msg);
-        }
+            if (data.ok) {
+              toast.success(data.msg);
+              ban.close();
+            } else {
+              toast.error(data.msg);
+            }
+          })
+          .catch((err) => {
+            if (err.name === "CanceledError") {
+              toast.error("Canceled");
+            }
+          })
+          .finally(() => {
+            toast.dismiss(loadingId);
+            ban.setEmail("");
+            ban.setUserId("");
+            setDisabled(false);
+            setDisabledBTN(false);
+          });
       } else {
-        console.error("ERROR");
         toast.dismiss(loadingId);
-        toast.error("ERROR");
+        toast.error("Empty Field Detected.");
       }
-
-      return controller.abort();
-    } catch (err) {
-      console.error(err);
-      toast.dismiss(loadingId);
-      toast.error("ERROR");
-    }
+    }, 500);
   };
 
   return (
@@ -90,10 +121,10 @@ const BanAccount = () => {
               className="text-xl px-4 rounded-xl w-full text-center py-1"
               required
             >
-              <option value="1day">1 Day</option>
-              <option value="3days">3 Days</option>
-              <option value="7days">7 Days</option>
-              <option value="30days">30 Days</option>
+              <option value="1">1 Day</option>
+              <option value="3">3 Days</option>
+              <option value="7">7 Days</option>
+              <option value="30">30 Days</option>
               <option value="permanent">Permanent</option>
             </select>
           </div>
@@ -102,17 +133,20 @@ const BanAccount = () => {
             <button
               type="submit"
               className="bg-[#2D9054] text-white shadow-sm rounded-lg px-4 py-2 text-lg"
+              disabled={disabled || disabledBTN}
             >
               Confirm
             </button>
             <button
               type="button"
-              className="bg-[#D73939] text-white shadow-sm rounded-lg px-4 py-2 text-lg"
+              className={`bg-[#D73939] text-white shadow-sm rounded-lg px-4 py-2 text-lg ${disabledBTN && "hidden"}`}
               onClick={() => {
+                controllerRef.current.abort();
                 ban.setUserId("");
                 ban.setEmail("");
                 ban.close();
               }}
+              disabled={disabled || disabledBTN}
             >
               Cancel
             </button>

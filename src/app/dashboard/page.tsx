@@ -257,7 +257,7 @@ const Page = () => {
         </div>
 
         <div
-          className={`relative w-4/5 min-h-[97vh] flex flex-col lg:w-full`}
+          className={`relative w-4/5 h-[97vh] flex flex-col lg:w-full overflow-hidden`}
           style={{
             backgroundImage:
               selectedButton === "low risk report" ||

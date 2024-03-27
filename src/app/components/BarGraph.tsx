@@ -56,7 +56,7 @@ const BarGraph = ({ data }: any) => {
         <Legend align="center" content={<CustomLegend />} />
         <Bar
           dataKey="lowRisk"
-          fill="blue"
+          fill="#289dd2"
           activeBar={<Rectangle fill="pink" stroke="blue" />}
           radius={[20, 20, 0, 0]}
         >
@@ -69,7 +69,7 @@ const BarGraph = ({ data }: any) => {
         </Bar>
         <Bar
           dataKey="highRisk"
-          fill="red"
+          fill="#E8C872"
           activeBar={<Rectangle fill="pink" stroke="blue" />}
           radius={[20, 20, 0, 0]}
         >

@@ -66,11 +66,14 @@ const LowRiskReports = () => {
         </select>
       </div>
 
-      <div className="relative w-full h-full px-6" ref={reference}>
+      <div
+        className="relative w-full h-full px-2 overflow-y-auto"
+        ref={reference}
+      >
         {!loading && !loadingMore && data && data.list.length === 0 ? (
           <div className="text-2xl font-semibold">No Reports</div>
         ) : (
-          <div className="w-full overflow-y-auto">
+          <div className="w-full pb-2">
             <LowPosts
               data={data}
               mutate={mutate}
@@ -78,6 +81,7 @@ const LowRiskReports = () => {
               loadingMore={loadingMore}
               noMore={noMore}
               reload={reload}
+              select={select}
             />
           </div>
         )}

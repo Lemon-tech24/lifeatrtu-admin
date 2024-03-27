@@ -102,6 +102,18 @@ const PendingDelete = () => {
       selection.setList(selection.list.filter((id) => id !== value));
     }
   };
+
+  const sortPostsByReports = (a: any, b: any) => {
+    if (!a.reports || !b.reports) return 0;
+    if (!a.reports.length || !b.reports.length) return 0;
+
+    if (select === "most") {
+      return b.reports[0].reasons.length - a.reports[0].reasons.length;
+    } else {
+      return a.reports[0].reasons.length - b.reports[0].reasons.length;
+    }
+  };
+
   return (
     <>
       <div className="w-full flex items-center justify-end p-6 gap-2">
@@ -121,161 +133,171 @@ const PendingDelete = () => {
         </select>
       </div>
 
-      <div className="relative w-full h-full px-6" ref={reference}>
+      <div
+        className="relative w-full h-full px-2 overflow-y-auto"
+        ref={reference}
+      >
         {!loading && !loadingMore && data && data.list.length === 0 ? (
           <div className="text-2xl font-semibold">No Reports</div>
         ) : (
-          <ResponsiveMasonry>
-            <Masonry gutter="20px">
-              {data &&
-                data.list &&
-                data.list.map((item: any, key: any) => {
-                  return (
-                    item && (
-                      <div
-                        key={key}
-                        className="p-2 pl-4 rounded-xl bg-slate-300 shadow-lg"
-                      >
-                        {/* ----------------------------------------------------------------- */}
-                        <div className="flex items-center justify-end gap-2">
-                          {selection.isOpen ? (
-                            <input
-                              type="checkbox"
-                              className="w-4 h-4 accent-black"
-                              checked={selection.list.includes(item.id)}
-                              value={item.id}
-                              onChange={checkboxChange}
-                            />
-                          ) : (
-                            <>
+          <div className="w-full pb-2">
+            <ResponsiveMasonry>
+              <Masonry gutter="20px">
+                {data &&
+                  data.list &&
+                  data.list
+                    .slice()
+                    .sort(sortPostsByReports)
+                    .map((item: any, key: any) => {
+                      return (
+                        item && (
+                          <div
+                            key={key}
+                            className="p-2 pl-4 rounded-xl bg-slate-300 shadow-lg"
+                          >
+                            {/* ----------------------------------------------------------------- */}
+                            <div className="flex items-center justify-end gap-2">
+                              {selection.isOpen ? (
+                                <input
+                                  type="checkbox"
+                                  className="w-4 h-4 accent-black"
+                                  checked={selection.list.includes(item.id)}
+                                  value={item.id}
+                                  onChange={checkboxChange}
+                                />
+                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                    disabled={loading || loadingMore}
+                                    onClick={() => {
+                                      approve.setPostId(item.id);
+
+                                      if (item.id === approve.postId) {
+                                        approveDelete(approve.postId);
+                                      }
+                                    }}
+                                  >
+                                    Approve
+                                  </button>
+                                  <button className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black">
+                                    Disregard
+                                  </button>
+                                  <button
+                                    className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                    onClick={() => {
+                                      ban.setEmail(item.user.email);
+                                      ban.setUserId(item.user.id);
+                                      ban.open();
+                                    }}
+                                  >
+                                    Ban
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                            {/* ----------------------------------------------------------------- */}
+                            <div className="font-bold text-2xl">
+                              {item.title}
+                            </div>
+                            {/* ----------------------------------------------------------------- */}
+                            <div className="flex gap-2 text-2xl uppercase font-bold">
+                              Focus:
+                              <div className="font-normal text-xl flex items-center justify-center">
+                                {item.focus}
+                              </div>
+                            </div>
+
+                            {/* ----------------------------------------------------------------- */}
+                            <div className="">
+                              {moment(item.createdAt).format("LLL")}
+                            </div>
+                            {/* ----------------------------------------------------------------- */}
+
+                            <div className="flex items-center gap-2">
+                              <div className="text-4xl">
+                                <CgProfile />
+                              </div>
+
+                              <div className="text-xl font-semibold">
+                                {session?.user.role === "mod"
+                                  ? item.anonymous && "Anonymous"
+                                  : item.user.name}
+                              </div>
+                            </div>
+                            {/* ----------------------------------------------------------------- */}
+
+                            <div className="text-lg break-words text-justify w-full">
+                              {item.content}
+                            </div>
+                            {/* ----------------------------------------------------------------- */}
+                            {item.image && (
+                              <div>
+                                <img
+                                  src={item.image}
+                                  alt="Post Image"
+                                  className="cursor-pointer"
+                                  onClick={() => {
+                                    image.source(item.image);
+                                    image.open();
+                                  }}
+                                />
+                              </div>
+                            )}
+                            {/* ----------------------------------------------------------------- */}
+                            <div className="flex w-full items-center justify-center gap-10 mt-8">
+                              <div
+                                className="flex items-center justify-center gap-1 cursor-pointer"
+                                onClick={() => {
+                                  report.setData(item);
+                                  report.open();
+                                }}
+                              >
+                                <div className="text-4xl">
+                                  <IoIosWarning />
+                                </div>
+                                <div
+                                  className="text-base font-semibold -mb-3"
+                                  style={{ color: "#CA0C0C" }}
+                                >
+                                  {item.reports[0].reasons.length} REPORTS
+                                </div>
+                              </div>
+
                               <button
                                 type="button"
-                                className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                                disabled={loading || loadingMore}
+                                className={`flex items-center justify-center gap-1 `}
                                 onClick={() => {
-                                  approve.setPostId(item.id);
-
-                                  if (item.id === approve.postId) {
-                                    approveDelete(approve.postId);
-                                  }
+                                  update.setPostId(item.id);
+                                  update.open();
                                 }}
                               >
-                                Approve
+                                <div className="text-4xl">
+                                  <FaCommentAlt />
+                                </div>
+                                <div className="text-base font-semibold -mb-2">
+                                  Updates
+                                </div>
                               </button>
-                              <button className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black">
-                                Disregard
-                              </button>
-                              <button
-                                className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                                onClick={() => {
-                                  ban.setEmail(item.user.email);
-                                  ban.setUserId(item.user.id);
-                                  ban.open();
-                                }}
-                              >
-                                Ban
-                              </button>
-                            </>
-                          )}
-                        </div>
-                        {/* ----------------------------------------------------------------- */}
-                        <div className="font-bold text-2xl">{item.title}</div>
-                        {/* ----------------------------------------------------------------- */}
-                        <div className="flex gap-2 text-2xl uppercase font-bold">
-                          Focus:
-                          <div className="font-normal text-xl flex items-center justify-center">
-                            {item.focus}
-                          </div>
-                        </div>
-
-                        {/* ----------------------------------------------------------------- */}
-                        <div className="">
-                          {moment(item.createdAt).format("LLL")}
-                        </div>
-                        {/* ----------------------------------------------------------------- */}
-
-                        <div className="flex items-center gap-2">
-                          <div className="text-4xl">
-                            <CgProfile />
-                          </div>
-
-                          <div className="text-xl font-semibold">
-                            {session?.user.role === "mod"
-                              ? item.anonymous && "Anonymous"
-                              : item.user.name}
-                          </div>
-                        </div>
-                        {/* ----------------------------------------------------------------- */}
-
-                        <div className="text-lg break-words text-justify w-full">
-                          {item.content}
-                        </div>
-                        {/* ----------------------------------------------------------------- */}
-                        {item.image && (
-                          <div>
-                            <img
-                              src={item.image}
-                              alt="Post Image"
-                              className="cursor-pointer"
-                              onClick={() => {
-                                image.source(item.image);
-                                image.open();
-                              }}
-                            />
-                          </div>
-                        )}
-                        {/* ----------------------------------------------------------------- */}
-                        <div className="flex w-full items-center justify-center gap-10 mt-8">
-                          <div
-                            className="flex items-center justify-center gap-1 cursor-pointer"
-                            onClick={() => {
-                              report.setData(item);
-                              report.open();
-                            }}
-                          >
-                            <div className="text-4xl">
-                              <IoIosWarning />
-                            </div>
-                            <div
-                              className="text-base font-semibold -mb-3"
-                              style={{ color: "#CA0C0C" }}
-                            >
-                              {item.reports[0].reasons.length} REPORTS
                             </div>
                           </div>
+                        )
+                      );
+                    })}
 
-                          <button
-                            type="button"
-                            className={`flex items-center justify-center gap-1 `}
-                            onClick={() => {
-                              update.setPostId(item.id);
-                              update.open();
-                            }}
-                          >
-                            <div className="text-4xl">
-                              <FaCommentAlt />
-                            </div>
-                            <div className="text-base font-semibold -mb-2">
-                              Updates
-                            </div>
-                          </button>
-                        </div>
-                      </div>
-                    )
-                  );
-                })}
-
-              {!loading && !loadingMore && noMore ? (
-                <div className="w-full h-full flex items-center justify-center font-semibold opacity-75">
-                  <div className="bg-white rounded-lg px-2 text-xl flex items-center">
-                    Nothing to Load
+                {!loading && !loadingMore && noMore ? (
+                  <div className="w-full h-full flex items-center justify-center font-semibold opacity-75">
+                    <div className="bg-white rounded-lg px-2 text-xl flex items-center">
+                      Nothing to Load
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <Skeleton />
-              )}
-            </Masonry>
-          </ResponsiveMasonry>
+                ) : (
+                  <Skeleton />
+                )}
+              </Masonry>
+            </ResponsiveMasonry>
+          </div>
         )}
       </div>
     </>

@@ -1,10 +1,8 @@
-"use client";
-
 import { isOpenUpdates } from "@/app/lib/useStore";
-import { useRequest } from "ahooks";
+import { useRequest, useDebounceFn } from "ahooks";
 import axios from "axios";
 import { useSession } from "next-auth/react";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 const Updates = () => {
@@ -12,30 +10,53 @@ const Updates = () => {
   const [comment, setComment] = useState<string>("");
   const [keyword, setKeyword] = useState<boolean>(false);
   const updates = isOpenUpdates();
+  const controllerRef = useRef(new AbortController());
+  const [disabled, setDisabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+    }
+    controllerRef.current = new AbortController();
+    return () => controllerRef.current?.abort();
+  }, [session]);
+
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    const loadingId = toast.loading("Loading");
 
-    try {
-      const loadingId = toast.loading("Loading");
-      const response = await axios.post("/api/update", {
-        comment: comment,
-        postId: updates.postId,
-      });
+    const { signal } = controllerRef.current;
 
-      const data = response.data;
-
-      if (data.ok) {
-        toast.success(data.msg);
-      } else {
-        toast.error(data.msg);
-      }
-
-      toast.dismiss(loadingId);
-    } catch (err) {
-      console.error();
-
-      toast.error("ERROR");
-    }
+    setTimeout(async () => {
+      setDisabled(true);
+      axios
+        .post(
+          "/api/update",
+          {
+            comment: comment,
+            postId: updates.postId,
+          },
+          { signal: signal }
+        )
+        .then((response) => {
+          if (response.data.ok) {
+            toast.success(response.data.msg);
+          } else {
+            toast.error(response.data.msg);
+          }
+        })
+        .catch((err) => {
+          if (err.name === "CanceledError") {
+            toast.error("Canceled");
+          }
+        })
+        .finally(() => {
+          toast.dismiss(loadingId);
+          setComment("");
+          setKeyword(!keyword);
+          setDisabled(false);
+        });
+    }, 1000);
   };
 
   const getUpdates = async () => {
@@ -56,7 +77,7 @@ const Updates = () => {
   };
 
   const { data, loading } = useRequest(getUpdates, {
-    refreshDeps: [session],
+    refreshDeps: [session, keyword],
   });
 
   return (
@@ -66,9 +87,12 @@ const Updates = () => {
         style={{ backgroundColor: "#D9D9D9" }}
       >
         <button
-          className="absolute top-2 right-4 rounded-md px-1 text-base font-semibold"
+          className={`absolute top-2 right-4 rounded-md px-1 text-base font-semibold ${disabled && "hidden"}`}
           style={{ backgroundColor: "#FF3F3F" }}
-          onClick={updates.close}
+          onClick={() => {
+            controllerRef.current.abort();
+            updates.close();
+          }}
         >
           Close
         </button>
