@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 import axios from "axios";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useInfiniteScroll } from "ahooks";
 import { useSession } from "next-auth/react";
 
@@ -27,8 +27,11 @@ import MultipleSelect from "./MultipleSelect";
 const HighRiskReports = () => {
   const { data: session } = useSession();
   const [select, setSelect] = useState<string>("most");
+  const [disabled, setDisabled] = useState<boolean>(false);
+  const [disableBTN, setDisabledBTN] = useState<boolean>(false);
 
   const reference = useRef<HTMLDivElement>(null);
+  const controllerRef = useRef(new AbortController());
 
   const image = isOpenImage();
   const report = isOpenReport();
@@ -37,6 +40,14 @@ const HighRiskReports = () => {
   const ban = isOpenBanAccount();
   const disregard = DisregardReport();
   const selection = useMultipleSelect();
+
+  useEffect(() => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+    }
+    controllerRef.current = new AbortController();
+    return () => controllerRef.current?.abort();
+  }, [session]);
 
   const getPosts = async (skip: any, take: number) => {
     try {
@@ -70,51 +81,81 @@ const HighRiskReports = () => {
       reloadDeps: [session, select, ban.value],
     });
 
-  const MarkDelete = async (postId: any) => {
-    const controller = new AbortController();
+  const MarkDelete = (postId: string) => {
     const loadingId = toast.loading("Deleting...");
-    try {
-      const response = await axios.post("/api/delete", {
-        postId: postId,
-        signal: controller.signal,
-      });
+    const { signal } = controllerRef.current;
 
-      const data = response.data;
-
-      if (data.ok) {
-        reload();
-        toast.dismiss(loadingId);
-        toast.success("Successfully Deleted");
-      } else {
-        toast.dismiss(loadingId);
-        toast.error("Failed to Delete");
-      }
-
-      return controller.abort();
-    } catch (err) {
-      console.error(err);
-      toast.dismiss(loadingId);
-      toast.error("ERROR");
+    if (disabled) {
+      toast.error("Please Wait");
     }
+
+    setDisabledBTN(true);
+
+    setTimeout(() => {
+      setDisabled(true);
+      axios
+        .post("/api/delete", { postId: postId }, { signal: signal })
+        .then((response) => {
+          const data = response.data;
+
+          if (data.ok) {
+            toast.success("Successfully Deleted");
+            reload();
+          } else {
+            toast.error("Failed To Delete");
+            throw new Error();
+          }
+        })
+        .catch((err) => {
+          if (err.name === "CanceledError") {
+            toast.error("Canceled");
+          }
+        })
+        .finally(() => {
+          toast.dismiss(loadingId);
+          setDisabled(false);
+          setDisabledBTN(false);
+        });
+    }, 500);
   };
 
-  const Disregard = async (postId: string) => {
+  const Disregard = (postId: string) => {
     const loadingId = toast.loading("Processing...");
-    try {
-      const response = await axios.post("/api/disregard", { postId: postId });
+    const { signal } = controllerRef.current;
 
-      const data = response.data;
-      toast.dismiss(loadingId);
-      if (data.ok) {
-        reload();
-        toast.success("Disregarded");
-      } else {
-        toast.error("Error Disregarding Post");
-      }
-    } catch (err) {
-      console.log(err);
+    if (disabled) {
+      toast.error("Please Wait");
     }
+
+    setDisabledBTN(true);
+
+    setTimeout(() => {
+      setDisabled(true);
+      axios
+        .post("/api/disregard", { postId: postId }, { signal: signal })
+        .then((response) => {
+          const data = response.data;
+
+          if (data.ok) {
+            toast.success("Disregarded");
+            reload();
+          } else {
+            toast.error("Error Disregarding Post");
+          }
+        })
+        .catch((err) => {
+          if (err.name === "CanceledError") {
+            toast.error("Canceled");
+          }
+        })
+        .finally(() => {
+          toast.dismiss(loadingId);
+          setDisabled(false);
+          setDisabledBTN(false);
+        });
+    }, 500);
   };
+
   const sortPostsByReports = (a: any, b: any) => {
     if (!a.reports || !b.reports) return 0;
     if (!a.reports.length || !b.reports.length) return 0;
@@ -133,6 +174,42 @@ const HighRiskReports = () => {
     } else {
       selection.setList(selection.list.filter((id) => id !== value));
     }
+  };
+
+  const requestDelete = (postId: string) => {
+    const loadingId = toast.loading("Requesting to Delete...");
+    const { signal } = controllerRef.current;
+    if (disabled) {
+      toast.error("Please Wait");
+    }
+
+    setDisabledBTN(true);
+
+    setTimeout(() => {
+      setDisabled(true);
+      axios
+        .post("/api/request/delete", { postId: postId }, { signal: signal })
+        .then((response) => {
+          const data = response.data;
+
+          if (data.ok) {
+            toast.success("Deletion Request Sent");
+            reload();
+          } else {
+            toast.error("Failed to Request");
+          }
+        })
+        .catch((err) => {
+          if (err.name === "CanceledError") {
+            toast.error("Canceled");
+          }
+        })
+        .finally(() => {
+          toast.dismiss(loadingId);
+          setDisabled(false);
+          setDisabledBTN(false);
+        });
+    }, 500);
   };
   return (
     <>
@@ -161,8 +238,8 @@ const HighRiskReports = () => {
           <div className="text-2xl font-semibold">No Reports</div>
         ) : (
           <div className="w-full pb-2">
-            <ResponsiveMasonry style={{ width: "100%", height: "100%" }}>
-              <Masonry gutter="20px">
+            <ResponsiveMasonry>
+              <Masonry gutter="10px">
                 {data &&
                   data.list &&
                   data.list
@@ -179,7 +256,11 @@ const HighRiskReports = () => {
                             <div className="flex items-center justify-end">
                               {session?.user.role === "mod" ? (
                                 !item.pending ? (
-                                  <button className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black">
+                                  <button
+                                    className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                    onClick={() => requestDelete(item.id)}
+                                    disabled={disabled || disableBTN}
+                                  >
                                     Request to Delete
                                   </button>
                                 ) : (
@@ -194,6 +275,7 @@ const HighRiskReports = () => {
                                       checked={selection.list.includes(item.id)}
                                       value={item.id}
                                       onChange={checkboxChange}
+                                      disabled={disabled || disableBTN}
                                     />
                                   ) : (
                                     <>
@@ -206,6 +288,7 @@ const HighRiskReports = () => {
                                             MarkDelete(markDone.postId);
                                           }
                                         }}
+                                        disabled={disabled || disableBTN}
                                       >
                                         Delete
                                       </button>
@@ -218,6 +301,7 @@ const HighRiskReports = () => {
                                             Disregard(disregard.postId);
                                           }
                                         }}
+                                        disabled={disabled || disableBTN}
                                       >
                                         Disregard
                                       </button>
@@ -229,6 +313,7 @@ const HighRiskReports = () => {
                                           ban.setEmail(item.user.email);
                                           ban.open();
                                         }}
+                                        disabled={disabled || disableBTN}
                                       >
                                         Ban
                                       </button>

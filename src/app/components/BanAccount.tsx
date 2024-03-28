@@ -16,6 +16,8 @@ const BanAccount = () => {
   const [disabled, setDisabled] = useState<boolean>(false);
   const [disabledBTN, setDisabledBTN] = useState<boolean>(false);
 
+  const [customDays, setCustomDays] = useState<number>(1);
+
   useEffect(() => {
     if (controllerRef.current) {
       controllerRef.current.abort();
@@ -51,6 +53,7 @@ const BanAccount = () => {
               reason: reason,
               email: ban.email,
               period: banPeriod,
+              custom: customDays,
             },
             { signal: signal }
           )
@@ -68,11 +71,11 @@ const BanAccount = () => {
             if (err.name === "CanceledError") {
               toast.error("Canceled");
             }
+
+            toast.error("Error Occurred");
           })
           .finally(() => {
             toast.dismiss(loadingId);
-            ban.setEmail("");
-            ban.setUserId("");
             setDisabled(false);
             setDisabledBTN(false);
           });
@@ -126,8 +129,18 @@ const BanAccount = () => {
               <option value="7">7 Days</option>
               <option value="30">30 Days</option>
               <option value="permanent">Permanent</option>
+              <option value="custom">Custom</option>
             </select>
           </div>
+          {banPeriod === "custom" && (
+            <input
+              type="number"
+              className="text-xl px-4 rounded-xl w-1/3 text-center py-1"
+              placeholder="Custom Days"
+              defaultValue={1}
+              onChange={(e: any) => setCustomDays(e.target.value)}
+            />
+          )}
 
           <div className="w-full flex items-center justify-center gap-20 mt-10">
             <button

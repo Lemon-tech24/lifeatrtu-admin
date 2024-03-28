@@ -8,7 +8,15 @@ export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
   try {
     if (session) {
-      const banUsers = await prisma.blacklist.findMany();
+      const banUsers = await prisma.blacklist.findMany({
+        where: {
+          NOT: {
+            permanent: false,
+            periodTime: 0,
+            days: 0,
+          },
+        },
+      });
 
       if (banUsers) {
         return NextResponse.json({ ok: true, users: banUsers });

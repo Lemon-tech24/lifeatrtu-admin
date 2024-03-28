@@ -9,10 +9,16 @@ export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
   try {
     if (session) {
-      const banUsers = await prisma.blacklist.delete({
+      const banUsers = await prisma.blacklist.update({
         where: {
           id: id,
           userId: userId,
+        },
+
+        data: {
+          permanent: false,
+          periodTime: 0,
+          days: 0,
         },
       });
 

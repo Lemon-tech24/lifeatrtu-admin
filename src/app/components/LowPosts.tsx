@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import { CgProfile } from "react-icons/cg";
 import { IoIosWarning } from "react-icons/io";
@@ -33,6 +33,11 @@ const LowPosts = ({
   select,
 }: any) => {
   const { data: session } = useSession();
+
+  const controllerRef = useRef(new AbortController());
+  const [disabled, setDisabled] = useState<boolean>(false);
+  const [disableBTN, setDisabledBTN] = useState<boolean>(false);
+
   const update = isOpenUpdates();
   const image = isOpenImage();
   const report = isOpenReport();
@@ -41,82 +46,89 @@ const LowPosts = ({
   const disregard = DisregardReport();
   const selection = useMultipleSelect();
 
-  const requestDelete = async (postId: string) => {
-    const loadingId = toast.loading("Requesting...");
-    try {
-      const response = await axios.post("/api/request/delete", {
-        postId: postId,
-      });
-
-      const data = response.data;
-
-      if (data.ok) {
-        mutate((currentData: any) => {
-          const updatedList = currentData.list.map((item: any) => {
-            if (item.id === postId) {
-              return { ...item, pending: true };
-            }
-            return item;
-          });
-          return { ...currentData, list: updatedList };
-        });
-
-        toast.dismiss(loadingId);
-        toast.success("Request to Delete Success");
-      } else {
-        toast.dismiss(loadingId);
-        toast.error("Request to Delete Failed");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("ERROR");
+  useEffect(() => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
     }
-  };
+    controllerRef.current = new AbortController();
+    return () => controllerRef.current?.abort();
+  }, [session]);
 
-  const MarkDelete = async (postId: any) => {
-    const controller = new AbortController();
+  const MarkDelete = (postId: string) => {
     const loadingId = toast.loading("Deleting...");
-    try {
-      const response = await axios.post("/api/delete", {
-        postId: postId,
-        signal: controller.signal,
-      });
+    const { signal } = controllerRef.current;
 
-      const data = response.data;
-
-      if (data.ok) {
-        toast.dismiss(loadingId);
-        toast.success("Successfully Deleted");
-        reload();
-      } else {
-        toast.dismiss(loadingId);
-        toast.error("Failed to Delete");
-      }
-
-      return controller.abort();
-    } catch (err) {
-      console.error(err);
-      toast.dismiss(loadingId);
-      toast.error("ERROR");
+    if (disabled) {
+      toast.error("Please Wait");
     }
+
+    setDisabledBTN(true);
+
+    setTimeout(() => {
+      setDisabled(true);
+      axios
+        .post("/api/delete", { postId: postId }, { signal: signal })
+        .then((response) => {
+          const data = response.data;
+
+          if (data.ok) {
+            toast.success("Successfully Deleted");
+            reload();
+          } else {
+            toast.error("Failed To Delete");
+            throw new Error();
+          }
+        })
+        .catch((err) => {
+          if (err.name === "CanceledError") {
+            toast.error("Canceled");
+          }
+        })
+        .finally(() => {
+          toast.dismiss(loadingId);
+          setDisabled(false);
+          setDisabledBTN(false);
+        });
+    }, 500);
   };
 
-  const Disregard = async (postId: string) => {
+  const Disregard = (postId: string) => {
     const loadingId = toast.loading("Processing...");
-    try {
-      const response = await axios.post("/api/disregard", { postId: postId });
+    const { signal } = controllerRef.current;
 
-      const data = response.data;
-      toast.dismiss(loadingId);
-      if (data.ok) {
-        toast.success("Disregarded");
-      } else {
-        toast.error("Error Disregarding Post");
-      }
-    } catch (err) {
-      console.log(err);
+    if (disabled) {
+      toast.error("Please Wait");
     }
+
+    setDisabledBTN(true);
+
+    setTimeout(() => {
+      setDisabled(true);
+      axios
+        .post("/api/disregard", { postId: postId }, { signal: signal })
+        .then((response) => {
+          const data = response.data;
+
+          if (data.ok) {
+            toast.success("Disregarded");
+            reload();
+          } else {
+            toast.error("Error Disregarding Post");
+          }
+        })
+        .catch((err) => {
+          if (err.name === "CanceledError") {
+            toast.error("Canceled");
+          }
+        })
+        .finally(() => {
+          toast.dismiss(loadingId);
+          setDisabled(false);
+          setDisabledBTN(false);
+        });
+    }, 500);
   };
+
   const checkboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target;
     if (checked) {
@@ -124,6 +136,42 @@ const LowPosts = ({
     } else {
       selection.setList(selection.list.filter((id) => id !== value));
     }
+  };
+
+  const requestDelete = (postId: string) => {
+    const loadingId = toast.loading("Requesting to Delete...");
+    const { signal } = controllerRef.current;
+    if (disabled) {
+      toast.error("Please Wait");
+    }
+
+    setDisabledBTN(true);
+
+    setTimeout(() => {
+      setDisabled(true);
+      axios
+        .post("/api/request/delete", { postId: postId }, { signal: signal })
+        .then((response) => {
+          const data = response.data;
+
+          if (data.ok) {
+            toast.success("Deletion Request Sent");
+            reload();
+          } else {
+            toast.error("Failed to Request");
+          }
+        })
+        .catch((err) => {
+          if (err.name === "CanceledError") {
+            toast.error("Canceled");
+          }
+        })
+        .finally(() => {
+          toast.dismiss(loadingId);
+          setDisabled(false);
+          setDisabledBTN(false);
+        });
+    }, 500);
   };
 
   const sortPostsByReports = (a: any, b: any) => {
@@ -160,6 +208,7 @@ const LowPosts = ({
                             <button
                               onClick={() => requestDelete(item.id)}
                               className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                              disabled={disabled || disableBTN}
                             >
                               Request to Delete
                             </button>
@@ -175,6 +224,7 @@ const LowPosts = ({
                                 checked={selection.list.includes(item.id)}
                                 value={item.id}
                                 onChange={checkboxChange}
+                                disabled={disabled || disableBTN}
                               />
                             ) : (
                               <>
@@ -188,6 +238,7 @@ const LowPosts = ({
                                       MarkDelete(markDone.postId);
                                     }
                                   }}
+                                  disabled={disabled || disableBTN}
                                 >
                                   Delete
                                 </button>
@@ -199,6 +250,7 @@ const LowPosts = ({
                                       Disregard(disregard.postId);
                                     }
                                   }}
+                                  disabled={disabled || disableBTN}
                                 >
                                   Disregard
                                 </button>
@@ -210,6 +262,7 @@ const LowPosts = ({
                                     ban.setEmail(item.user.email);
                                     ban.open();
                                   }}
+                                  disabled={disabled || disableBTN}
                                 >
                                   Ban
                                 </button>

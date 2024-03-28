@@ -57,9 +57,9 @@
   display: none;
 }
 
-/* nextjs-portal {
+nextjs-portal {
   display: none;
-} */
+}
 
 @media (max-width: 1023px) {
   .bm-overlay {

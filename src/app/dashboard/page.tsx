@@ -11,7 +11,6 @@ import LowRiskReports from "../components/LowRiskReports";
 import { IoMenu } from "react-icons/io5";
 import { slide as Menu } from "react-burger-menu";
 import {
-  BanCountDown,
   isOpenAddModerators,
   isOpenBanAccount,
   isOpenBanUsers,
@@ -95,7 +94,6 @@ const Page = () => {
   const ban = isOpenBanAccount();
   const banUsers = isOpenBanUsers();
 
-  const banTimer = BanCountDown();
   const selection = useMultipleSelect();
 
   useEffect(() => {}, []);

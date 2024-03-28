@@ -18,7 +18,16 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      if (disregardReport) {
+      const pendingPost = await prisma.post.update({
+        where: {
+          id: postId,
+        },
+        data: {
+          pending: false,
+        },
+      });
+
+      if (disregardReport && pendingPost) {
         return NextResponse.json({ ok: true });
       } else return NextResponse.json({ ok: false });
     } else

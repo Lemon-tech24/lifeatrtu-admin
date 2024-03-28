@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useInfiniteScroll } from "ahooks";
 import { useSession } from "next-auth/react";
 import axios from "axios";
@@ -23,6 +23,11 @@ import MultipleSelect from "./MultipleSelect";
 const PendingDelete = () => {
   const { data: session } = useSession();
   const [select, setSelect] = useState<string>("most");
+
+  const controllerRef = useRef(new AbortController());
+  const [disabled, setDisabled] = useState<boolean>(false);
+  const [disableBTN, setDisabledBTN] = useState<boolean>(false);
+
   const reference = useRef<HTMLDivElement>(null);
   const image = isOpenImage();
   const report = isOpenReport();
@@ -30,6 +35,14 @@ const PendingDelete = () => {
   const approve = isApproveDelete();
   const ban = isOpenBanAccount();
   const selection = useMultipleSelect();
+
+  useEffect(() => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+    }
+    controllerRef.current = new AbortController();
+    return () => controllerRef.current?.abort();
+  }, [session]);
 
   const getPosts = async (skip: any, take: number) => {
     try {
@@ -66,32 +79,42 @@ const PendingDelete = () => {
     }
   );
 
-  const approveDelete = async (postId: any) => {
-    const controller = new AbortController();
-    const loadingToast = toast.loading("Deleting");
-    try {
-      const response = await axios.post("/api/delete", {
-        postId: postId,
-        signal: controller.signal,
-      });
+  const approveDelete = (postId: string) => {
+    const loadingId = toast.loading("Deleting...");
+    const { signal } = controllerRef.current;
 
-      const data = response.data;
-
-      if (data.ok) {
-        reload();
-        toast.dismiss(loadingToast);
-        toast.success("Successfully Deleted");
-      } else {
-        toast.dismiss(loadingToast);
-        toast.error("Failed to Delete");
-      }
-
-      return controller.abort();
-    } catch (err) {
-      console.error(err);
-      toast.dismiss(loadingToast);
-      toast.error("ERROR");
+    if (disabled) {
+      toast.error("Please Wait");
     }
+
+    setDisabledBTN(true);
+
+    setTimeout(() => {
+      setDisabled(true);
+      axios
+        .post("/api/delete", { postId: postId }, { signal: signal })
+        .then((response) => {
+          const data = response.data;
+
+          if (data.ok) {
+            toast.success("Successfully Deleted");
+            reload();
+          } else {
+            toast.error("Failed To Delete");
+            throw new Error();
+          }
+        })
+        .catch((err) => {
+          if (err.name === "CanceledError") {
+            toast.error("Canceled");
+          }
+        })
+        .finally(() => {
+          toast.dismiss(loadingId);
+          setDisabled(false);
+          setDisabledBTN(false);
+        });
+    }, 500);
   };
 
   const checkboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,6 +135,43 @@ const PendingDelete = () => {
     } else {
       return a.reports[0].reasons.length - b.reports[0].reasons.length;
     }
+  };
+
+  const Disregard = (postId: string) => {
+    const loadingId = toast.loading("Processing...");
+    const { signal } = controllerRef.current;
+
+    if (disabled) {
+      toast.error("Please Wait");
+    }
+
+    setDisabledBTN(true);
+
+    setTimeout(() => {
+      setDisabled(true);
+      axios
+        .post("/api/disregard", { postId: postId }, { signal: signal })
+        .then((response) => {
+          const data = response.data;
+
+          if (data.ok) {
+            toast.success("Disregarded");
+            reload();
+          } else {
+            toast.error("Error Disregarding Post");
+          }
+        })
+        .catch((err) => {
+          if (err.name === "CanceledError") {
+            toast.error("Canceled");
+          }
+        })
+        .finally(() => {
+          toast.dismiss(loadingId);
+          setDisabled(false);
+          setDisabledBTN(false);
+        });
+    }, 500);
   };
 
   return (
@@ -142,7 +202,7 @@ const PendingDelete = () => {
         ) : (
           <div className="w-full pb-2">
             <ResponsiveMasonry>
-              <Masonry gutter="20px">
+              <Masonry gutter="10px">
                 {data &&
                   data.list &&
                   data.list
@@ -164,13 +224,19 @@ const PendingDelete = () => {
                                   checked={selection.list.includes(item.id)}
                                   value={item.id}
                                   onChange={checkboxChange}
+                                  disabled={disabled || disableBTN}
                                 />
                               ) : (
                                 <>
                                   <button
                                     type="button"
                                     className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                                    disabled={loading || loadingMore}
+                                    disabled={
+                                      loading ||
+                                      loadingMore ||
+                                      disabled ||
+                                      disableBTN
+                                    }
                                     onClick={() => {
                                       approve.setPostId(item.id);
 
@@ -181,7 +247,16 @@ const PendingDelete = () => {
                                   >
                                     Approve
                                   </button>
-                                  <button className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black">
+                                  <button
+                                    className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                    onClick={() => Disregard(item.id)}
+                                    disabled={
+                                      loading ||
+                                      loadingMore ||
+                                      disabled ||
+                                      disableBTN
+                                    }
+                                  >
                                     Disregard
                                   </button>
                                   <button
@@ -191,6 +266,12 @@ const PendingDelete = () => {
                                       ban.setUserId(item.user.id);
                                       ban.open();
                                     }}
+                                    disabled={
+                                      loading ||
+                                      loadingMore ||
+                                      disabled ||
+                                      disableBTN
+                                    }
                                   >
                                     Ban
                                   </button>
@@ -247,12 +328,18 @@ const PendingDelete = () => {
                             )}
                             {/* ----------------------------------------------------------------- */}
                             <div className="flex w-full items-center justify-center gap-10 mt-8">
-                              <div
+                              <button
                                 className="flex items-center justify-center gap-1 cursor-pointer"
                                 onClick={() => {
                                   report.setData(item);
                                   report.open();
                                 }}
+                                disabled={
+                                  loading ||
+                                  loadingMore ||
+                                  disabled ||
+                                  disableBTN
+                                }
                               >
                                 <div className="text-4xl">
                                   <IoIosWarning />
@@ -263,7 +350,7 @@ const PendingDelete = () => {
                                 >
                                   {item.reports[0].reasons.length} REPORTS
                                 </div>
-                              </div>
+                              </button>
 
                               <button
                                 type="button"
@@ -272,6 +359,12 @@ const PendingDelete = () => {
                                   update.setPostId(item.id);
                                   update.open();
                                 }}
+                                disabled={
+                                  loading ||
+                                  loadingMore ||
+                                  disabled ||
+                                  disableBTN
+                                }
                               >
                                 <div className="text-4xl">
                                   <FaCommentAlt />

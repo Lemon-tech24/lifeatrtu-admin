@@ -16,9 +16,23 @@ export async function POST(request: NextRequest) {
         where: {
           pending: false,
           user: {
-            NOT: {
+            is: {
               blacklists: {
-                some: {},
+                every: {
+                  AND: {
+                    periodTime: {
+                      equals: 0,
+                    },
+
+                    days: {
+                      equals: 0,
+                    },
+
+                    permanent: {
+                      equals: false,
+                    },
+                  },
+                },
               },
             },
           },
