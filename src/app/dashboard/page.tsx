@@ -105,7 +105,7 @@ const Page = () => {
   ) : (
     <>
       <button
-        className="absolute top-2 left-4 text-5xl hidden lg:block cursor-pointer z-10 sm:top-1 sm:left-2 sm:text-4xl"
+        className="absolute top-2 left-4 md:left-2 text-5xl hidden lg:block cursor-pointer z-10 sm:top-1 sm:left-2 sm:text-4xl"
         onClick={handleOpen}
       >
         <IoMenu />
@@ -156,7 +156,7 @@ const Page = () => {
                 </button>
               );
             })}
-            <div className="flex flex-col gap-1 justify-center">
+            <div className="flex flex-col gap-4 justify-center">
               {session.user.role !== "mod" && (
                 <button
                   type="button"
@@ -164,6 +164,7 @@ const Page = () => {
                   onClick={() => {
                     selection.setList([]);
                     selection.setClose();
+                    handleClose();
                     settings.open();
                   }}
                 >

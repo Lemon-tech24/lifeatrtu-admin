@@ -63,7 +63,7 @@ const Moderators = () => {
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-slate-500/80 z-50 flex items-center justify-center">
       <div
-        className="w-5/12 rounded-xl flex flex-col px-12 p-4"
+        className="w-5/12 rounded-xl flex flex-col px-12 p-4 xl:w-8/12 md:w-11/12 sm:w-[94%]"
         style={{ backgroundColor: "#D9D9D9", maxHeight: "80vh" }}
       >
         <div className="flex items-center justify-center uppercase text-3xl font-semibold mb-4">
@@ -115,7 +115,7 @@ const Moderators = () => {
         )}
         <div className="w-full flex items-center justify-center">
           <button
-            className="text-xl px-4 rounded-xl text-black"
+            className="text-xl px-4 rounded-xl text-black xl:text-lg xl:px-2 sm:text-sm"
             style={{ backgroundColor: "#FF3F3F" }}
             onClick={() => {
               mods.close();

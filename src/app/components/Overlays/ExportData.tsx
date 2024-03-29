@@ -10,23 +10,12 @@ import axios from "axios";
 import { useRequest } from "ahooks";
 import AuditReportPDF from "../AuditReportPDF";
 
-const data = [
-  { name: "A", uv: 4000, pv: 2400, amt: 2400 },
-  { name: "B", uv: 3000, pv: 1398, amt: 2210 },
-  { name: "C", uv: 2000, pv: 9800, amt: 2290 },
-  { name: "D", uv: 2780, pv: 3908, amt: 2000 },
-  { name: "E", uv: 1890, pv: 4800, amt: 2181 },
-  { name: "F", uv: 2390, pv: 3800, amt: 2500 },
-  { name: "G", uv: 3490, pv: 4300, amt: 2100 },
-];
-
 const tableData = [
   {
     email: "user1@example.com",
     title: "Post 1",
     focus: "Focus 1",
-    content:
-      "asdasd asdasdasdasdas dasdasd asdasdasdasdas dasdasd asdasdasdasdas dasdasd asdasdasdasdas dasdasd asdsssssssssssssssssssssssssssssssssasdasdasdas dasdasd asdasdasdasdas dasdasd asdasdasdasdas dasdasd asdasdasdasdas dasdasd asdasdasdasdas dasdasd asdasdasdasdas dasdasd asdasdasdasdas dasdasd asdasdasdasdas dasdasd asdasdasdasdas dasdasd asdasdasdasdas dasdasd asdasdasdasdas dasdasd asdasdasdasdas dasdasd asdaaaaassssssssssssssssssssssdasdasdas dasdasd asdasdasdasdas dasdasd asdasdasdasdas dasdasd asdasdasdasdas dasdasd asdasdasda",
+    content: "asd asdasdasdasdas dsdasd asda",
     riskCategory: "Low",
   },
   {
@@ -75,29 +64,10 @@ const ExportData = () => {
     }
   };
 
-  // const getExportReports = async () => {
-  //   try {
-  //     const response = await axios.post("/api/export", {
-  //       start: selectionRange.startDate.toISOString(),
-  //       end: selectionRange.endDate.toISOString(),
-  //     });
-
-  //     const data = response.data;
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // };
-
-  // const { data, loading } = useRequest(getExportReports, {
-  //   refreshDeps: [session, selectionRange],
-  // });
-
-  // console.log("start :", selectionRange.startDate);
-  // console.log("end :", selectionRange.endDate);
   return (
     <div className="fixed top-0 left-0 w-full h-screen bg-slate-500/80 z-50 flex items-center justify-center">
       <div
-        className="w-5/12 rounded-xl flex flex-col gap-10 p-6"
+        className="w-5/12 rounded-xl flex gap-10 p-6"
         style={{ backgroundColor: "#D9D9D9" }}
       >
         <div className="w-full flex items-center justify-center uppercase text-3xl font-semibold">

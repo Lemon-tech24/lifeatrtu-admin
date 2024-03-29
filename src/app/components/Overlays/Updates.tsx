@@ -83,7 +83,7 @@ const Updates = () => {
   return (
     <div className="fixed top-0 left-0 w-full h-screen bg-slate-500/80 z-50 flex items-center justify-center">
       <div
-        className="relative w-7/12 rounded-xl flex flex-col gap-10 p-4 h-[90%]"
+        className="relative w-7/12 rounded-xl flex flex-col gap-10 p-4 h-[90%] lg:w-10/12 sm:w-full sm:h-full sm:rounded-none"
         style={{ backgroundColor: "#D9D9D9" }}
       >
         <button
@@ -99,7 +99,7 @@ const Updates = () => {
         <div className="w-full text-center text-3xl uppercase font-bold">
           Updates
         </div>
-        <div className="w-full overflow-auto flex gap-2 flex-col items-center px-16">
+        <div className="w-full overflow-y-auto flex gap-2 flex-col items-center px-16 lg:px-10 sm:px-4">
           {loading ? (
             <div className="loading loading-dots w-16"></div>
           ) : data && data.updates.length > 0 ? (
@@ -117,14 +117,14 @@ const Updates = () => {
         </div>
 
         <form
-          className="w-full flex flex-col justify-center px-16"
+          className="w-full flex flex-col justify-center px-16 lg:px-10 sm:px-4"
           onSubmit={handleSubmit}
         >
           <input
             type="text"
             placeholder="Post an update"
             name="comment"
-            className={`p-4 rounded-xl text-xl ${loading ? "cursor-not-allowed" : "cursor-pointer"}`}
+            className={`p-4 rounded-xl text-xl ${loading ? "cursor-not-allowed" : "cursor-pointer"} md:text-lg`}
             onChange={(e) => setComment(e.target.value)}
             required
             disabled={loading ? true : false}

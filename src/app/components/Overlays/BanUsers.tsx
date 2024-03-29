@@ -118,7 +118,7 @@ const BanUsers = () => {
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-slate-500/80 z-50 flex items-center justify-center">
       <div
-        className="w-8/12 rounded-xl flex flex-col gap-10 p-8"
+        className="w-8/12 rounded-xl flex flex-col gap-10 p-8 xl:p-6 xl:w-10/12 lg:w-[92%] md:p-2 sm:w-full sm:h-full sm:rounded-none sm:justify-center"
         style={{ backgroundColor: "#D9D9D9" }}
       >
         <div className="uppercase w-full flex items-center justify-center text-3xl font-semibold">
@@ -134,10 +134,16 @@ const BanUsers = () => {
               <table className="w-full h-full border-collapse shadow-lg">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="py-4 text-center align-middle">Unban</th>
-                    <th className="py-4 text-center align-middle">Email</th>
-                    <th className="py-4 text-center align-middle">Reason</th>
-                    <th className="py-4 text-center align-middle">
+                    <th className="py-2 text-center align-middle text-base md:text-sm">
+                      Unban
+                    </th>
+                    <th className="py-2 text-center align-middle text-base md:text-sm">
+                      Email
+                    </th>
+                    <th className="py-2 text-center align-middle text-base md:text-sm">
+                      Reason
+                    </th>
+                    <th className="py-2 text-center align-middle text-base md:text-sm">
                       Ban Period
                     </th>
                   </tr>
@@ -156,26 +162,29 @@ const BanUsers = () => {
                       updatedAt,
                     }: any) => (
                       <tr key={id} className="bg-white">
-                        <td className="text-center py-4">
+                        <td className="text-center py-2">
                           <button
                             type="button"
-                            className="text-4xl text-red-600 hover:text-red-700 focus:outline-none"
+                            className="text-4xl text-red-600 hover:text-red-700 focus:outline-none md:text-2xl"
                             disabled={loading || disabled || disabledBTN}
                             onClick={() => unBanUser(id, userId)}
                           >
                             <HiUserRemove />
                           </button>
                         </td>
-                        <td className="py-4 text-center">{email}</td>
-                        <td className="py-4 text-center">{reason}</td>
-                        <td className="text-center py-4">
+                        <td className="py-2 text-center text-base md:text-sm">
+                          {email}
+                        </td>
+                        <td className="py-2 text-center text-base md:text-sm">
+                          {reason}
+                        </td>
+                        <td className="text-center py-2text-base md:text-sm">
                           {permanent ? (
                             <span className="text-green-600 font-semibold">
                               Permanent
                             </span>
                           ) : (
                             <>
-                              <div className="font-semibold">From</div>
                               {moment(createdAt).format("lll")}
                               <div className="font-semibold">To</div>
                               {moment(

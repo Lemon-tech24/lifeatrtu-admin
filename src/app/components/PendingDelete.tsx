@@ -176,7 +176,7 @@ const PendingDelete = () => {
 
   return (
     <>
-      <div className="w-full flex items-center justify-end p-6 gap-2">
+      <div className="w-full flex items-center justify-end p-6 gap-2 sm:pr-2">
         <MultipleSelect
           reload={reload}
           loading={loading}
@@ -184,7 +184,7 @@ const PendingDelete = () => {
           tab={"pending"}
         />
         <select
-          className="rounded-xl px-2 text-xl border border-black border-solid shadow-lg"
+          className="rounded-xl px-2 text-xl border border-black border-solid shadow-lg md:text-base sm:text-sm"
           defaultValue={"most"}
           onChange={(e) => setSelect(e.target.value)}
         >
@@ -198,7 +198,7 @@ const PendingDelete = () => {
         ref={reference}
       >
         {!loading && !loadingMore && data && data.list.length === 0 ? (
-          <div className="text-2xl font-semibold">No Reports</div>
+          <div className="text-2xl font-semibold md:text-lg">No Reports</div>
         ) : (
           <div className="w-full pb-2">
             <ResponsiveMasonry>

@@ -139,12 +139,12 @@ const MultipleSelect = ({ reload, loading, loadingMore, tab }: any) => {
   return (
     session &&
     session.user.role !== "mod" && (
-      <div className="flex gap-2 items-center">
+      <div className="flex gap-2 items-center sm:gap-[2px]">
         {selection.isOpen && (
-          <div className="flex items-center gap-2 animate-fadeIn">
+          <div className="flex items-center gap-2 animate-fadeIn sm:gap-[2px]">
             <button
               type="button"
-              className={`text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
+              className={`text-base sm:text-xs px-2 rounded-xl bg-slate-400/80 border border-solid border-black ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
               onClick={handleDeleteAll}
               disabled={disabled || loading || loadingMore || disableBTN}
               aria-disabled={disabled || loading || loadingMore || disableBTN}
@@ -153,7 +153,7 @@ const MultipleSelect = ({ reload, loading, loadingMore, tab }: any) => {
             </button>
             <button
               type="button"
-              className={`text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
+              className={`text-base sm:text-xs px-2 rounded-xl bg-slate-400/80 border border-solid border-black ${disabled ? "cursor-not-allowed" : "cursor-pointer"}`}
               disabled={disabled || loading || loadingMore || disableBTN}
               aria-disabled={disabled || loading || loadingMore || disableBTN}
               onClick={handleDisregardAll}
@@ -164,7 +164,7 @@ const MultipleSelect = ({ reload, loading, loadingMore, tab }: any) => {
         )}
         <button
           type="button"
-          className={`text-3xl flex items-center ${!selection.isOpen && "tooltip tooltip-left"} ${disableBTN && "hidden"}`}
+          className={`text-3xl sm:text-2xl flex items-center ${!selection.isOpen && "tooltip tooltip-left"} ${disableBTN && "hidden"}`}
           onClick={() => {
             selection.setList([]);
 

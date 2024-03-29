@@ -67,7 +67,7 @@ const AddModerators = () => {
   return (
     <div className="fixed top-0 left-0 w-full h-screen bg-slate-500/80 z-50 flex items-center justify-center">
       <div
-        className="w-5/12 rounded-xl flex flex-col gap-10 p-6"
+        className="w-5/12 rounded-xl flex flex-col gap-10 p-6 xl:w-8/12 md:w-11/12 sm:w-full sm:h-full sm:rounded-none sm:items-center justify-center"
         style={{ backgroundColor: "#D9D9D9" }}
       >
         <div className="w-full flex items-center justify-center uppercase text-2xl font-semibold">
@@ -79,12 +79,12 @@ const AddModerators = () => {
           autoComplete="off"
           ref={formRef}
         >
-          <div className="flex gap-12 w-10/12">
-            <p className="w-24 text-2xl">Username: </p>
+          <div className="flex gap-12 w-10/12 sm:w-full">
+            <p className="w-24 text-2xl md:text-xl">Username: </p>
             <input
               type="text"
               name="username"
-              className="w-full rounded-lg px-4 text-lg"
+              className="w-full rounded-lg px-4 text-lg md:text-base"
               placeholder="Create Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -92,12 +92,12 @@ const AddModerators = () => {
             />
           </div>
 
-          <div className="flex gap-12 w-10/12">
-            <p className="w-24 text-2xl">Password: </p>
+          <div className="flex gap-12 w-10/12 sm:w-full">
+            <p className="w-24 text-2xl md:text-xl">Password: </p>
             <input
               type="password"
               name="password"
-              className="w-full rounded-lg px-4 text-lg"
+              className="w-full rounded-lg px-4 text-lg md:text-base"
               placeholder="*****************"
               minLength={8}
               value={password}
@@ -105,7 +105,7 @@ const AddModerators = () => {
               required
             />
           </div>
-          <div className="flex w-10/12 m-auto">
+          <div className="flex w-10/12 m-auto sm:w-full">
             <span className="w-40"></span>
 
             <div className="text-xs">
@@ -130,13 +130,13 @@ const AddModerators = () => {
             </div>
           </div>
 
-          <div className="flex gap-14 w-10/12">
+          <div className="flex gap-14 w-10/12 sm:w-full">
             <p className="w-28 text-sm font-semibold">Confirm Password: </p>
             <input
               type="password"
               name="cpassword"
               value={cpassword}
-              className="w-full rounded-lg px-2 text-lg"
+              className="w-full rounded-lg px-2 text-lg md:text-base"
               placeholder="Confirm Password"
               onChange={confirmPassword}
               required
@@ -148,7 +148,7 @@ const AddModerators = () => {
 
           <div className="w-10/12 flex items-center justify-center gap-4 mt-4">
             <button
-              className={`text-lg font-semibold rounded-lg px-2 ${same ? "cursor-pointer" : "cursor-not-allowed"}`}
+              className={`text-lg md:text-base font-semibold rounded-lg px-2 ${same ? "cursor-pointer" : "cursor-not-allowed"}`}
               style={{ backgroundColor: "#2D9054" }}
               type="submit"
               disabled={same ? false : true}
@@ -157,7 +157,7 @@ const AddModerators = () => {
               Confirm
             </button>
             <button
-              className="text-lg font-semibold rounded-lg px-2"
+              className="text-lg font-semibold rounded-lg px-2 md:text-base"
               style={{ backgroundColor: "#FF3F3F" }}
               onClick={() => {
                 addMods.close();
