@@ -26,12 +26,19 @@ export async function POST(request: NextRequest) {
         select: {
           reports: true,
         },
+
+        orderBy: {
+          createdAt: "asc",
+        },
       });
 
       const categorizedReports = reports.map((post) => ({
         ...post,
         reportsByDate: post.reports.reduce((acc: any, report) => {
-          const reportDate = new Date(report.createdAt).toDateString();
+          const reportDate = new Date(report.createdAt).toLocaleDateString(
+            undefined,
+            { month: "short", day: "numeric", year: "numeric" },
+          );
 
           if (!acc[reportDate]) {
             acc[reportDate] = { highRisk: 0, lowRisk: 0 };
@@ -73,6 +80,13 @@ export async function POST(request: NextRequest) {
           return result;
         })
         .flat();
+
+      data.sort((a, b) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return dateA - dateB;
+      });
+
       return NextResponse.json({ ok: true, list: data });
     } else {
       return NextResponse.json({ message: "UNAUTHORIZED" }, { status: 401 });

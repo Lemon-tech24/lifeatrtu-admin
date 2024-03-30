@@ -125,7 +125,7 @@ const PieGraph = ({ data }: any) => {
   }));
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer>
       <PieChart>
         <Pie
           data={data}

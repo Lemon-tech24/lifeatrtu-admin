@@ -174,6 +174,8 @@ const PendingDelete = () => {
     }, 500);
   };
 
+  console.log(data);
+
   return (
     <>
       <div className="w-full flex items-center justify-end p-6 gap-2 sm:pr-2">
@@ -348,7 +350,8 @@ const PendingDelete = () => {
                                   className="text-base font-semibold -mb-3"
                                   style={{ color: "#CA0C0C" }}
                                 >
-                                  {item.reports[0].reasons.length} REPORTS
+                                  {item.reports[key].reasons[key].length}
+                                  REPORTS
                                 </div>
                               </button>
 

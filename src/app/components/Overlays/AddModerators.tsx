@@ -1,8 +1,8 @@
 import { isOpenAddModerators, isOpenSettings } from "@/app/lib/useStore";
-import React, { use, useEffect, useRef, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
-import { createModerator } from "@/app/actions/createMods";
+import React, { ChangeEvent, use, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { useSession } from "next-auth/react";
+import axios from "axios";
 
 const AddModerators = () => {
   const addMods = isOpenAddModerators();
@@ -12,9 +12,19 @@ const AddModerators = () => {
   const [username, setUsername] = useState<string>("");
   const [isValid, setIsValid] = useState<boolean>(false);
   const [same, setSame] = useState<boolean>(false);
-  const [state, formAction] = useFormState(createModerator, undefined);
-  const { pending } = useFormStatus();
+  const controllerRef = useRef<AbortController>(new AbortController());
+
+  const { data: session } = useSession();
+
   const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+    }
+    controllerRef.current = new AbortController();
+    return () => controllerRef.current?.abort();
+  }, [session]);
 
   const passwordChange = (e: any) => {
     const newPassword = e.target.value;
@@ -37,32 +47,66 @@ const AddModerators = () => {
     }
   };
 
-  useEffect(() => {
-    if (state && state?.message) {
-      toast.success(state.message, {
-        className: "text-xl text-center",
-        duration: 2000,
-      });
-      formRef.current && formRef.current.reset();
-      setPassword("");
-      setCPassword("");
-      setUsername("");
-      setIsValid(false);
-      setSame(false);
-    } else if (state?.error) {
-      toast.error(`${state?.error}`, {
-        duration: 3000,
-        className: "text-xl text-center",
-      });
+  const [disable, setDisable] = useState<boolean>(false);
+  const [disableBTN, setDisabledBTN] = useState<boolean>(false);
 
-      formRef.current && formRef.current.reset();
-      setPassword("");
-      setCPassword("");
-      setUsername("");
-      setIsValid(false);
-      setSame(false);
+  const handleSubmit = (e: ChangeEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const loadingId = toast.loading("Loading");
+
+    const { signal } = controllerRef.current;
+
+    if (disable) {
+      toast.error("Please Wait");
     }
-  }, [state]);
+
+    setDisable(true);
+    if (same && isValid) {
+      setTimeout(() => {
+        setDisabledBTN(true);
+
+        axios
+          .post(
+            "/api/moderator/create",
+            {
+              username: username,
+              pass: password,
+              cpass: cpassword,
+            },
+            { signal: signal }
+          )
+          .then((response) => {
+            const data = response.data;
+
+            if (data.ok) {
+              toast.success(data.msg);
+            } else {
+              toast.error(data.msg);
+            }
+          })
+          .catch((err) => {
+            if (err.name === "CanceledError") {
+              return toast.error("Canceled");
+            }
+            return toast.error("Error Occurred");
+          })
+          .finally(() => {
+            toast.dismiss(loadingId);
+            formRef.current && formRef.current.reset();
+            setPassword("");
+            setCPassword("");
+            setUsername("");
+            setIsValid(false);
+            setSame(false);
+            setDisable(false);
+            setDisabledBTN(false);
+          });
+      }, 500);
+    } else {
+      toast.dismiss(loadingId);
+      toast.error("Invalid Username or Password");
+    }
+  };
 
   return (
     <div className="fixed top-0 left-0 w-full h-screen bg-slate-500/80 z-50 flex items-center justify-center">
@@ -75,8 +119,8 @@ const AddModerators = () => {
         </div>
         <form
           className="w-full flex flex-col gap-2 items-center"
-          action={formAction}
           autoComplete="off"
+          onSubmit={handleSubmit}
           ref={formRef}
         >
           <div className="flex gap-12 w-10/12 sm:w-full">
@@ -151,15 +195,15 @@ const AddModerators = () => {
               className={`text-lg md:text-base font-semibold rounded-lg px-2 ${same ? "cursor-pointer" : "cursor-not-allowed"}`}
               style={{ backgroundColor: "#2D9054" }}
               type="submit"
-              disabled={same ? false : true}
-              aria-disabled={pending}
+              disabled={disableBTN || disable}
             >
               Confirm
             </button>
             <button
-              className="text-lg font-semibold rounded-lg px-2 md:text-base"
+              className={`text-lg font-semibold rounded-lg px-2 md:text-base ${disableBTN && "hidden"}`}
               style={{ backgroundColor: "#FF3F3F" }}
               onClick={() => {
+                controllerRef.current.abort();
                 addMods.close();
                 settings.open();
                 setPassword("");
@@ -169,6 +213,7 @@ const AddModerators = () => {
                 setSame(false);
               }}
               type="button"
+              disabled={disableBTN}
             >
               Cancel
             </button>

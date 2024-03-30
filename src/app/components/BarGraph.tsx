@@ -24,9 +24,9 @@ const CustomLegend = ({ payload }: any) => {
             style={{
               backgroundColor: entry.color,
             }}
-            className="w-10 h-20 md:w-8 md:h-16 sm:h-10 inline-block rounded-3xl"
+            className="w-10 h-20 md:w-6 md:h-14 sm:h-8 inline-block rounded-3xl"
           ></span>
-          <span className="font-semibold text-xl">
+          <span className="font-semibold text-xl md:text-base">
             {entry.value === "highRisk" ? "High Risk" : "Low Risk"}
           </span>
         </li>
@@ -40,9 +40,7 @@ const BarGraph = ({ data }: any) => {
     <ResponsiveContainer>
       <BarChart
         data={data}
-        width={400}
-        height={200}
-        margin={{ top: 15, right: 10, bottom: 5, left: -28 }}
+        margin={{ top: 15, right: 10, bottom: 5, left: -32 }}
       >
         <CartesianGrid
           strokeDasharray="0"
@@ -50,8 +48,16 @@ const BarGraph = ({ data }: any) => {
           color="black"
           vertical={false}
         />
-        <XAxis dataKey="date" className="text-xl md:text-sm" />
-        <YAxis allowDecimals={false} tickCount={10} className="text-xl md:-" />
+        <XAxis
+          dataKey="date"
+          className="text-xl xl:text-xs md:text-[8px]"
+          allowDataOverflow
+        />
+        <YAxis
+          allowDecimals={false}
+          tickCount={10}
+          className="text-xl md:text-base"
+        />
 
         <Legend align="center" content={<CustomLegend />} />
         <Bar

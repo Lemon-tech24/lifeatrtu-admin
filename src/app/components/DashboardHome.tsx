@@ -171,7 +171,7 @@ const DashboardHome = () => {
         </button>
       </div>
       <div
-        className={`flex-grow ${(loading || data?.length === 0) && "flex w-full h-full items-center justify-center"}`}
+        className={`flex-grow ${(loading || data?.length === 0) && "flex w-full h-full items-center justify-center overflow-auto"}`}
       >
         {loading ? (
           <div className="loading loading-dots w-20"></div>
