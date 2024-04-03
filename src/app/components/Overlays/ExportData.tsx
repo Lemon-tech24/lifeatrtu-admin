@@ -1,5 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { isOpenExportData, isOpenSettings } from "@/app/lib/useStore";
+import {
+  isOpenExportData,
+  isOpenReport,
+  isOpenSettings,
+} from "@/app/lib/useStore";
 import { useEffect, useState } from "react";
 import { DateRangePicker } from "react-date-range";
 import "react-date-range/dist/styles.css";
@@ -26,9 +30,12 @@ import {
   LabelList,
   Legend,
   Rectangle,
+  ResponsiveContainer,
   XAxis,
   YAxis,
 } from "recharts";
+import moment from "moment";
+import BarGraph, { CustomLegend } from "../BarGraph";
 
 const tableData = [
   {
@@ -79,6 +86,7 @@ const combineDataByDate = (data: any) => {
 const ExportData = () => {
   const { close } = isOpenExportData();
   const settings = isOpenSettings();
+  const [hydrate, setHydrate] = useState<boolean>(false);
   const { data: session } = useSession();
   const [selectionRange, setSelectionRange] = useState<Range>({
     startDate: new Date(),
@@ -87,24 +95,31 @@ const ExportData = () => {
   });
 
   const handleSelect = (ranges: any) => {
-    if (ranges) {
-      setSelectionRange(ranges.selection);
-    }
+    setSelectionRange(ranges.selection);
   };
 
-  const BarGraphData = async () => {
-    try {
-      const response = await axios.post("/api/reports/read", {
-        start: selectionRange.startDate,
-        end: selectionRange.endDate,
-      });
-      const data = response.data;
+  useEffect(() => {
+    setHydrate(true);
+  }, []);
 
-      if (data.ok) {
-        const newData = combineDataByDate(data.list);
-        return newData;
-      } else {
-        if (data.msg) toast.error(data.msg);
+  const getHighRisk = async () => {
+    const { startDate, endDate } = selectionRange;
+
+    try {
+      if (startDate && endDate) {
+        const startUTC8 = moment(startDate).utcOffset("+08:00").toISOString();
+        const endUTC8 = moment(endDate).utcOffset("+08:00").toISOString();
+
+        const response = await axios.post("/api/export", {
+          start: startUTC8,
+          end: endUTC8,
+        });
+
+        const data = response.data;
+
+        if (data && data !== null && data !== undefined) {
+          return data;
+        }
       }
     } catch (err) {
       console.error(err);
@@ -112,9 +127,14 @@ const ExportData = () => {
     }
   };
 
+  const { data, loading } = useRequest(getHighRisk, {
+    refreshDeps: [session, selectionRange],
+  });
+
   const styles = StyleSheet.create({
     page: {
-      flexDirection: "column",
+      flexDirection: "row",
+      backgroundColor: "#E4E4E4",
       padding: 10,
     },
     section: {
@@ -123,106 +143,205 @@ const ExportData = () => {
       flexGrow: 1,
     },
     table: {
-      display: "flex",
-      flexDirection: "column",
+      width: "100%",
       borderStyle: "solid",
       borderWidth: 1,
-      borderColor: "#000",
-      width: "100%",
     },
-    textColumn: { fontSize: 20 },
+
     tableRow: {
       flexDirection: "row",
-      borderBottomWidth: 1,
-      borderColor: "#000",
-      fontSize: 20,
+      height: 40, // Set a fixed height for each row
     },
-    tableCell: {
-      padding: 5,
+    tableColHeader: {
+      width: "20%", // Adjusted width for each column header
       borderStyle: "solid",
       borderWidth: 1,
-      borderColor: "#000",
-      flexGrow: 1,
-      width: `${100 / 5}%`,
-      fontSize: 12,
+      textAlign: "center",
+      fontWeight: "bold",
     },
-    tableText: {
-      textAlign: "justify",
+    tableCell: {
+      width: "20%", // Adjusted width for each cell
+      borderStyle: "solid",
+      borderWidth: 1,
+      textAlign: "center",
+      fontSize: 10, // Set font size to 10px
     },
   });
 
-  const bar = useRequest(BarGraphData, {
-    refreshDeps: [session, selectionRange],
-  });
+  const HighAudit = ({ data }: any) => (
+    <Page size="A4" style={styles.page} orientation="landscape">
+      <View style={styles.section}>
+        <Text>
+          High Risk Category from{" "}
+          {moment(selectionRange.startDate).format("ll")} to{" "}
+          {moment(selectionRange.endDate).format("ll")}
+        </Text>
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableColHeader}>
+              <Text>Author</Text>
+            </View>
+            <View style={styles.tableColHeader}>
+              <Text>Title</Text>
+            </View>
 
-  const AuditReportPDF = () => (
-    <Document>
-      <Page size="A4" style={styles.page} orientation="landscape"></Page>
-    </Document>
+            <View style={styles.tableColHeader}>
+              <Text>Focus</Text>
+            </View>
+
+            <View style={styles.tableColHeader}>
+              <Text>Content</Text>
+            </View>
+            <View style={styles.tableColHeader}>
+              <Text>Date Posted</Text>
+            </View>
+          </View>
+          {data.map((item: any, index: any) => {
+            return (
+              <View key={index} style={styles.tableRow}>
+                <View style={styles.tableCell}>
+                  <Text>{item.user.email}</Text>
+                </View>
+                <View style={styles.tableCell}>
+                  <Text>{item.title}</Text>
+                </View>
+
+                <View style={styles.tableCell}>
+                  <Text>{item.focus}</Text>
+                </View>
+
+                <View style={styles.tableCell}>
+                  <Text>{item.content}</Text>
+                </View>
+
+                <View style={styles.tableCell}>
+                  <Text>{moment(item.createdAt).format("lll")}</Text>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+      </View>
+    </Page>
   );
 
+  const LowAudit = ({ data }: any) => (
+    <Page size="A4" style={styles.page} orientation="landscape">
+      <View style={styles.section}>
+        <Text>
+          Low Risk Category from {moment(selectionRange.startDate).format("ll")}{" "}
+          to {moment(selectionRange.endDate).format("ll")}
+        </Text>
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <View style={styles.tableColHeader}>
+              <Text>Author</Text>
+            </View>
+            <View style={styles.tableColHeader}>
+              <Text>Title</Text>
+            </View>
+
+            <View style={styles.tableColHeader}>
+              <Text>Focus</Text>
+            </View>
+
+            <View style={styles.tableColHeader}>
+              <Text>Content</Text>
+            </View>
+
+            <View style={styles.tableColHeader}>
+              <Text>Date Posted</Text>
+            </View>
+          </View>
+          {data.map((item: any, index: any) => {
+            console.log(item);
+            return (
+              <View key={index} style={styles.tableRow}>
+                <View style={styles.tableCell}>
+                  <Text>{item.user.email}</Text>
+                </View>
+                <View style={styles.tableCell}>
+                  <Text>{item.title}</Text>
+                </View>
+                <View style={styles.tableCell}>
+                  <Text>{item.focus}</Text>
+                </View>
+                <View style={styles.tableCell}>
+                  <Text>{item.content}</Text>
+                </View>
+                <View style={styles.tableCell}>
+                  <Text>{moment(item.createdAt).format("lll")}</Text>
+                </View>
+              </View>
+            );
+          })}
+        </View>
+      </View>
+    </Page>
+  );
+
+  const AuditReportPDF = ({ data }: any) =>
+    data && (
+      <Document>
+        {data.high.length !== 0 && <HighAudit data={data.high} />}
+        {data.low.length !== 0 && <LowAudit data={data.low} />}
+      </Document>
+    );
+
   return (
-    <div className="fixed top-0 left-0 w-full h-screen bg-slate-500/80 z-50 flex items-center justify-center">
-      <div
-        className="w-5/12 rounded-xl gap-10 p-6"
-        style={{ backgroundColor: "#D9D9D9" }}
-      >
-        <div className="w-full flex items-center justify-center uppercase text-3xl font-semibold">
-          Export Data
-        </div>
+    hydrate && (
+      <div className="fixed top-0 left-0 w-full h-screen bg-slate-500/80 z-50 flex items-center justify-center">
+        <div
+          className="w-9/12 rounded-xl gap-10 p-6"
+          style={{ backgroundColor: "#D9D9D9" }}
+        >
+          <div className="w-full flex items-center justify-center uppercase text-3xl font-semibold">
+            Export Data
+          </div>
 
-        <PDFViewer height="100%" width="100%">
-          <AuditReportPDF />
-        </PDFViewer>
+          <div className="w-full flex items-center justify-center px-2 gap-4">
+            <div className="flex flex-col items-center justify-start w-full gap-2">
+              <DateRangePicker
+                className="w-full h-full flex justify-center"
+                ranges={[selectionRange]}
+                onChange={handleSelect}
+                maxDate={new Date()}
+              />
+            </div>
 
-        <div className="w-full flex items-center justify-center flex-col px-10 gap-4">
-          <div className="flex items-center justify-start w-full gap-2">
-            <p className="text-2xl">Custom Range</p>
-            <DateRangePicker
-              ranges={[selectionRange]}
-              onChange={handleSelect}
-            />
+            <div className="flex flex-col items-center justify-start w-full gap-2">
+              {loading && <span className="loading loading-dots w-20"></span>}
+              {data &&
+                data !== 0 &&
+                !loading &&
+                (data.high.length !== 0 || data.low.length !== 0) && (
+                  <PDFViewer height="500px" width="100%">
+                    <AuditReportPDF data={data} />
+                  </PDFViewer>
+                )}
+
+              {!loading && data.high.length === 0 && data.low.length === 0 && (
+                <>No Data</>
+              )}
+            </div>
+          </div>
+
+          <div className="w-full flex items-center justify-center gap-4 mt-4">
+            <button
+              className="text-lg font-semibold rounded-lg px-2"
+              style={{ backgroundColor: "#FF3F3F" }}
+              onClick={() => {
+                close();
+                settings.open();
+              }}
+              type="button"
+            >
+              Cancel
+            </button>
           </div>
         </div>
-
-        <div className="w-full flex items-center justify-center gap-4 mt-4">
-          <button
-            disabled={
-              selectionRange.startDate === null ||
-              selectionRange.startDate === undefined
-                ? true
-                : false
-            }
-            className={`${
-              selectionRange.startDate === null ||
-              selectionRange.startDate === undefined
-                ? "cursor-not-allowed"
-                : "cursor-pointer"
-            }`}
-          >
-            <PDFDownloadLink
-              document={<AuditReportPDF />}
-              fileName="exportData.pdf"
-            >
-              {({ blob, url, loading, error }) =>
-                loading ? "Loading document..." : "Download now!"
-              }
-            </PDFDownloadLink>
-          </button>
-          <button
-            className="text-lg font-semibold rounded-lg px-2"
-            style={{ backgroundColor: "#FF3F3F" }}
-            onClick={() => {
-              close();
-              settings.open();
-            }}
-            type="button"
-          >
-            Cancel
-          </button>
-        </div>
       </div>
-    </div>
+    )
   );
 };
 
