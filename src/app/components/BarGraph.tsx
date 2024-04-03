@@ -50,11 +50,7 @@ const BarGraph = ({ data }: any) => {
           color="black"
           vertical={false}
         />
-        <XAxis
-          dataKey="date"
-          className="text-xl xl:text-xs md:text-[8px]"
-          allowDataOverflow
-        />
+        <XAxis dataKey="date" className="text-xl xl:text-xs md:text-[8px]" />
         <YAxis
           allowDecimals={false}
           tickCount={10}

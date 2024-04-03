@@ -18,13 +18,15 @@ export async function POST(request: NextRequest) {
           reasons: {
             has: "hate speech",
           },
-          AND: {
-            createdAt: {
-              gte: start,
-              lte: end,
+          AND: [
+            {
+              createdAt: {
+                gte: start,
+                lte: end,
+              },
+              disregard: false,
             },
-            disregard: false,
-          },
+          ],
         },
       });
 
@@ -33,13 +35,15 @@ export async function POST(request: NextRequest) {
           reasons: {
             has: "false information",
           },
-          AND: {
-            createdAt: {
-              gte: start,
-              lte: end,
+          AND: [
+            {
+              createdAt: {
+                gte: start,
+                lte: end,
+              },
+              disregard: false,
             },
-            disregard: false,
-          },
+          ],
         },
       });
 
@@ -48,13 +52,15 @@ export async function POST(request: NextRequest) {
           reasons: {
             has: "harassment",
           },
-          AND: {
-            createdAt: {
-              gte: start,
-              lte: end,
+          AND: [
+            {
+              createdAt: {
+                gte: start,
+                lte: end,
+              },
+              disregard: false,
             },
-            disregard: false,
-          },
+          ],
         },
       });
 
@@ -63,13 +69,15 @@ export async function POST(request: NextRequest) {
           reasons: {
             has: "nudity",
           },
-          AND: {
-            createdAt: {
-              gte: start,
-              lte: end,
+          AND: [
+            {
+              createdAt: {
+                gte: start,
+                lte: end,
+              },
+              disregard: false,
             },
-            disregard: false,
-          },
+          ],
         },
       });
 
@@ -78,13 +86,15 @@ export async function POST(request: NextRequest) {
           reasons: {
             has: "spam",
           },
-          AND: {
-            createdAt: {
-              gte: start,
-              lte: end,
+          AND: [
+            {
+              createdAt: {
+                gte: start,
+                lte: end,
+              },
+              disregard: false,
             },
-            disregard: false,
-          },
+          ],
         },
       });
 
@@ -93,13 +103,15 @@ export async function POST(request: NextRequest) {
           reasons: {
             has: "suicidal or self injury",
           },
-          AND: {
-            createdAt: {
-              gte: start,
-              lte: end,
+          AND: [
+            {
+              createdAt: {
+                gte: start,
+                lte: end,
+              },
+              disregard: false,
             },
-            disregard: false,
-          },
+          ],
         },
       });
 
@@ -108,13 +120,15 @@ export async function POST(request: NextRequest) {
           reasons: {
             has: "violence",
           },
-          AND: {
-            createdAt: {
-              gte: start,
-              lte: end,
+          AND: [
+            {
+              createdAt: {
+                gte: start,
+                lte: end,
+              },
+              disregard: false,
             },
-            disregard: false,
-          },
+          ],
         },
       });
 
@@ -123,13 +137,15 @@ export async function POST(request: NextRequest) {
           reasons: {
             has: "something else",
           },
-          AND: {
-            createdAt: {
-              gte: start,
-              lte: end,
+          AND: [
+            {
+              createdAt: {
+                gte: start,
+                lte: end,
+              },
+              disregard: false,
             },
-            disregard: false,
-          },
+          ],
         },
       });
 

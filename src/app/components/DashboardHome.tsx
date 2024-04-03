@@ -32,43 +32,8 @@ const DashboardHome = () => {
   const [graph, setGraph] = useState<string>("bar");
   const [selected, setSelected] = useState<string>("");
 
-  const getReportsData = async () => {
-    const { start, end } = generateDateRanges(selected);
-    try {
-      const response = await axios.post("/api/reports/read", {
-        start: start,
-        end: end,
-      });
-
-      const data = response.data;
-      const combineDataByDate = (data: any) => {
-        const combinedData: any = {};
-        data.forEach((item: any) => {
-          if (!combinedData[item.date]) {
-            combinedData[item.date] = {
-              date: item.date,
-              highRisk: 0,
-              lowRisk: 0,
-            };
-          }
-          combinedData[item.date].highRisk += item.highRisk;
-          combinedData[item.date].lowRisk += item.lowRisk;
-        });
-        return Object.values(combinedData);
-      };
-      if (data.ok) {
-        const newData = combineDataByDate(data.list);
-        return newData;
-      }
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
-  };
-
-  const formatDate = (date: Date) => date.toISOString();
   const generateDateRange = (startDate: Date, endDate: Date) => {
-    return { start: formatDate(startDate), end: formatDate(endDate) };
+    return { start: startDate.toISOString(), end: endDate.toISOString() };
   };
 
   const generateDateRanges = (selectedRange: string) => {
@@ -107,6 +72,42 @@ const DashboardHome = () => {
 
     return generateDateRange(startDate, endDate);
   };
+
+  const combineDataByDate = (data: any) => {
+    const combinedData: any = {};
+    data.forEach((item: any) => {
+      if (!combinedData[item.date]) {
+        combinedData[item.date] = {
+          date: item.date,
+          highRisk: 0,
+          lowRisk: 0,
+        };
+      }
+      combinedData[item.date].highRisk += item.highRisk;
+      combinedData[item.date].lowRisk += item.lowRisk;
+    });
+    return Object.values(combinedData);
+  };
+
+  const getReportsData = async () => {
+    const { start, end } = generateDateRanges(selected);
+    try {
+      const response = await axios.post("/api/reports/read", {
+        start: start,
+        end: end,
+      });
+
+      const data = response.data;
+      if (data.ok) {
+        const newData = combineDataByDate(data.list);
+        return newData;
+      }
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  };
+
   const { data, loading } = useRequest(getReportsData, {
     refreshDeps: [session, selected],
   });

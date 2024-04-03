@@ -16,29 +16,31 @@ export async function POST(request: NextRequest) {
         where: {
           reports: {
             some: {
-              AND: [
-                {
-                  createdAt: {
-                    gte: start,
-                    lte: end,
-                  },
-                  disregard: false,
-                },
-              ],
+              createdAt: {
+                gte: start,
+                lte: end,
+              },
+              disregard: false,
             },
           },
         },
-        select: {
-          reports: true,
+        include: {
+          reports: {
+            where: {
+              createdAt: {
+                gte: start,
+                lte: end,
+              },
+              disregard: false,
+            },
+          },
         },
-
         orderBy: {
           createdAt: "asc",
         },
       });
 
       const categorizedReports = reports.map((post) => ({
-        ...post,
         reportsByDate: post.reports.reduce((acc: any, report) => {
           const reportDate = new Date(report.createdAt).toLocaleDateString(
             undefined,

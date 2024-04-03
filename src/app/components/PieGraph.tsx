@@ -118,12 +118,6 @@ const PieGraph = ({ data }: any) => {
     );
   };
 
-  const legendData = data.map((entry: any, index: number) => ({
-    value: entry.name,
-    type: "circle",
-    color: COLORS[index % COLORS.length],
-  }));
-
   return (
     <ResponsiveContainer>
       <PieChart>
