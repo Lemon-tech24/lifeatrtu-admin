@@ -195,6 +195,10 @@ const LowPosts = ({
               .slice()
               .sort(sortPostsByReports)
               .map((item: any, key: any) => {
+                const totalReports = item.reports.reduce(
+                  (acc: number, report: any) => acc + report.reasons.length,
+                  0
+                );
                 return (
                   item && (
                     <div
@@ -293,8 +297,8 @@ const LowPosts = ({
                         </div>
 
                         <div className="text-xl font-semibold">
-                          {session?.user.role === "mod" ? (
-                            item.anonymous && "Anonymous"
+                          {session?.user.role === "mod" && item.anonymous ? (
+                            "Anonymous"
                           ) : session?.user.role !== "mod" && item.anonymous ? (
                             <div className="flex items-center gap-1">
                               {item.user.name}
@@ -345,7 +349,7 @@ const LowPosts = ({
                             className="text-base font-semibold -mb-3"
                             style={{ color: "#CA0C0C" }}
                           >
-                            {item.reports[0].reasons.length} REPORTS
+                            {totalReports} REPORTS
                           </div>
                         </div>
 
