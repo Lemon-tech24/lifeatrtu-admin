@@ -11,7 +11,7 @@ import {
   YAxis,
 } from "recharts";
 
-const CustomLegend = ({ payload }: any) => {
+export const CustomLegend = ({ payload }: any) => {
   return (
     <ul className="flex list-none items-center justify-evenly">
       {payload.map((entry: any, index: any) => (
@@ -40,6 +40,8 @@ const BarGraph = ({ data }: any) => {
     <ResponsiveContainer>
       <BarChart
         data={data}
+        width={1000}
+        height={500}
         margin={{ top: 15, right: 10, bottom: 5, left: -32 }}
       >
         <CartesianGrid

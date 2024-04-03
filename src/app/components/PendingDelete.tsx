@@ -108,6 +108,7 @@ const PendingDelete = () => {
           if (err.name === "CanceledError") {
             toast.error("Canceled");
           }
+          toast.error("Error Occurred");
         })
         .finally(() => {
           toast.dismiss(loadingId);
@@ -165,6 +166,7 @@ const PendingDelete = () => {
           if (err.name === "CanceledError") {
             toast.error("Canceled");
           }
+          toast.error("Error Occurred");
         })
         .finally(() => {
           toast.dismiss(loadingId);

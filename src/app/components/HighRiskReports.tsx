@@ -110,6 +110,8 @@ const HighRiskReports = () => {
           if (err.name === "CanceledError") {
             toast.error("Canceled");
           }
+
+          toast.error("Error Occurred");
         })
         .finally(() => {
           toast.dismiss(loadingId);
@@ -147,6 +149,8 @@ const HighRiskReports = () => {
           if (err.name === "CanceledError") {
             toast.error("Canceled");
           }
+
+          toast.error("Error Occurred");
         })
         .finally(() => {
           toast.dismiss(loadingId);
@@ -203,6 +207,7 @@ const HighRiskReports = () => {
           if (err.name === "CanceledError") {
             toast.error("Canceled");
           }
+          toast.error("Error Occured");
         })
         .finally(() => {
           toast.dismiss(loadingId);

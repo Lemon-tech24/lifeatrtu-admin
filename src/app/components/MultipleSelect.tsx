@@ -61,6 +61,7 @@ const MultipleSelect = ({ reload, loading, loadingMore, tab }: any) => {
             if (err.name === "CanceledError") {
               toast.error("Canceled");
             }
+            toast.error("Error Occurred");
           })
           .finally(() => {
             selection.setClose();
@@ -119,6 +120,7 @@ const MultipleSelect = ({ reload, loading, loadingMore, tab }: any) => {
             if (err.name === "CanceledError") {
               toast.error("Canceled");
             }
+            toast.error("Error Occurred");
           })
           .finally(() => {
             selection.setClose();

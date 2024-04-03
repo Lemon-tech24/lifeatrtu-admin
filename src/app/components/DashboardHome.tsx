@@ -33,13 +33,11 @@ const DashboardHome = () => {
   const [selected, setSelected] = useState<string>("");
 
   const getReportsData = async () => {
-    const controller = new AbortController();
     const { start, end } = generateDateRanges(selected);
     try {
       const response = await axios.post("/api/reports/read", {
         start: start,
         end: end,
-        signal: controller.signal,
       });
 
       const data = response.data;
@@ -62,8 +60,6 @@ const DashboardHome = () => {
         const newData = combineDataByDate(data.list);
         return newData;
       }
-
-      controller.abort();
     } catch (err) {
       console.error(err);
       throw err;
@@ -74,6 +70,7 @@ const DashboardHome = () => {
   const generateDateRange = (startDate: Date, endDate: Date) => {
     return { start: formatDate(startDate), end: formatDate(endDate) };
   };
+
   const generateDateRanges = (selectedRange: string) => {
     const today = new Date();
     const startOfToday = new Date(today);
@@ -84,13 +81,14 @@ const DashboardHome = () => {
 
     switch (selectedRange) {
       case "week":
-        startDate = new Date(today);
-        startDate.setDate(today.getDate() - today.getDay() - 6);
+        const firstDayOfWeek = new Date(today);
+        firstDayOfWeek.setDate(today.getDay() - 6);
+        startDate = new Date(firstDayOfWeek);
         endDate = new Date(today);
         break;
       case "month":
         startDate = new Date(today);
-        startDate.setMonth(today.getMonth() - 30);
+        startDate.setDate(today.getDate() - 30);
         endDate = new Date(today);
         break;
       case "all":
@@ -109,7 +107,6 @@ const DashboardHome = () => {
 
     return generateDateRange(startDate, endDate);
   };
-
   const { data, loading } = useRequest(getReportsData, {
     refreshDeps: [session, selected],
   });

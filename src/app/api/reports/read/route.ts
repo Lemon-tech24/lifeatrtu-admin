@@ -1,5 +1,6 @@
 import { authOptions } from "@/app/lib/auth";
 import prisma from "@/app/lib/prisma";
+import moment from "moment";
 import { getServerSession } from "next-auth";
 import { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -15,11 +16,15 @@ export async function POST(request: NextRequest) {
         where: {
           reports: {
             some: {
-              createdAt: {
-                gte: start,
-                lte: end,
-              },
-              disregard: false,
+              AND: [
+                {
+                  createdAt: {
+                    gte: start,
+                    lte: end,
+                  },
+                  disregard: false,
+                },
+              ],
             },
           },
         },

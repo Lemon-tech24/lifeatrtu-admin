@@ -4,11 +4,31 @@ import { useEffect, useState } from "react";
 import { DateRangePicker } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
-import { PDFViewer, usePDF } from "@react-pdf/renderer";
+import {
+  Document,
+  Page,
+  PDFDownloadLink,
+  PDFViewer,
+  StyleSheet,
+  Text,
+  usePDF,
+  View,
+} from "@react-pdf/renderer";
 import { useSession } from "next-auth/react";
 import axios from "axios";
 import { useRequest } from "ahooks";
-import AuditReportPDF from "../AuditReportPDF";
+import toast from "react-hot-toast";
+import ReactPDFChart from "react-pdf-charts";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  LabelList,
+  Legend,
+  Rectangle,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 const tableData = [
   {
@@ -40,6 +60,22 @@ interface Range {
   key: string;
 }
 
+const combineDataByDate = (data: any) => {
+  const combinedData: any = {};
+  data.forEach((item: any) => {
+    if (!combinedData[item.date]) {
+      combinedData[item.date] = {
+        date: item.date,
+        highRisk: 0,
+        lowRisk: 0,
+      };
+    }
+    combinedData[item.date].highRisk += item.highRisk;
+    combinedData[item.date].lowRisk += item.lowRisk;
+  });
+  return Object.values(combinedData);
+};
+
 const ExportData = () => {
   const { close } = isOpenExportData();
   const settings = isOpenSettings();
@@ -50,31 +86,93 @@ const ExportData = () => {
     key: "selection",
   });
 
-  const [instance, update] = usePDF({
-    document: <AuditReportPDF data={tableData} />,
-  });
-
-  useEffect(() => {
-    update(<AuditReportPDF data={tableData} />);
-  }, [session]);
-
   const handleSelect = (ranges: any) => {
     if (ranges) {
       setSelectionRange(ranges.selection);
     }
   };
 
+  const BarGraphData = async () => {
+    try {
+      const response = await axios.post("/api/reports/read", {
+        start: selectionRange.startDate,
+        end: selectionRange.endDate,
+      });
+      const data = response.data;
+
+      if (data.ok) {
+        const newData = combineDataByDate(data.list);
+        return newData;
+      } else {
+        if (data.msg) toast.error(data.msg);
+      }
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  };
+
+  const styles = StyleSheet.create({
+    page: {
+      flexDirection: "column",
+      padding: 10,
+    },
+    section: {
+      margin: 10,
+      padding: 10,
+      flexGrow: 1,
+    },
+    table: {
+      display: "flex",
+      flexDirection: "column",
+      borderStyle: "solid",
+      borderWidth: 1,
+      borderColor: "#000",
+      width: "100%",
+    },
+    textColumn: { fontSize: 20 },
+    tableRow: {
+      flexDirection: "row",
+      borderBottomWidth: 1,
+      borderColor: "#000",
+      fontSize: 20,
+    },
+    tableCell: {
+      padding: 5,
+      borderStyle: "solid",
+      borderWidth: 1,
+      borderColor: "#000",
+      flexGrow: 1,
+      width: `${100 / 5}%`,
+      fontSize: 12,
+    },
+    tableText: {
+      textAlign: "justify",
+    },
+  });
+
+  const bar = useRequest(BarGraphData, {
+    refreshDeps: [session, selectionRange],
+  });
+
+  const AuditReportPDF = () => (
+    <Document>
+      <Page size="A4" style={styles.page} orientation="landscape"></Page>
+    </Document>
+  );
+
   return (
     <div className="fixed top-0 left-0 w-full h-screen bg-slate-500/80 z-50 flex items-center justify-center">
       <div
-        className="w-5/12 rounded-xl flex gap-10 p-6"
+        className="w-5/12 rounded-xl gap-10 p-6"
         style={{ backgroundColor: "#D9D9D9" }}
       >
         <div className="w-full flex items-center justify-center uppercase text-3xl font-semibold">
           Export Data
         </div>
-        <PDFViewer height="600" width="800">
-          <AuditReportPDF data={tableData} />
+
+        <PDFViewer height="100%" width="100%">
+          <AuditReportPDF />
         </PDFViewer>
 
         <div className="w-full flex items-center justify-center flex-col px-10 gap-4">
@@ -102,14 +200,14 @@ const ExportData = () => {
                 : "cursor-pointer"
             }`}
           >
-            <a
-              className="text-lg font-semibold rounded-lg px-2"
-              style={{ backgroundColor: "#2D9054" }}
-              href={instance.url as any}
-              download={"exportedData.pdf"}
+            <PDFDownloadLink
+              document={<AuditReportPDF />}
+              fileName="exportData.pdf"
             >
-              Confirm
-            </a>
+              {({ blob, url, loading, error }) =>
+                loading ? "Loading document..." : "Download now!"
+              }
+            </PDFDownloadLink>
           </button>
           <button
             className="text-lg font-semibold rounded-lg px-2"

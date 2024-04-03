@@ -18,11 +18,13 @@ export async function POST(request: NextRequest) {
           reasons: {
             has: "hate speech",
           },
-          createdAt: {
-            gte: start,
-            lte: end,
+          AND: {
+            createdAt: {
+              gte: start,
+              lte: end,
+            },
+            disregard: false,
           },
-          disregard: false,
         },
       });
 
@@ -31,11 +33,13 @@ export async function POST(request: NextRequest) {
           reasons: {
             has: "false information",
           },
-          createdAt: {
-            gte: start,
-            lte: end,
+          AND: {
+            createdAt: {
+              gte: start,
+              lte: end,
+            },
+            disregard: false,
           },
-          disregard: false,
         },
       });
 
@@ -44,11 +48,13 @@ export async function POST(request: NextRequest) {
           reasons: {
             has: "harassment",
           },
-          createdAt: {
-            gte: start,
-            lte: end,
+          AND: {
+            createdAt: {
+              gte: start,
+              lte: end,
+            },
+            disregard: false,
           },
-          disregard: false,
         },
       });
 
@@ -57,11 +63,13 @@ export async function POST(request: NextRequest) {
           reasons: {
             has: "nudity",
           },
-          createdAt: {
-            gte: start,
-            lte: end,
+          AND: {
+            createdAt: {
+              gte: start,
+              lte: end,
+            },
+            disregard: false,
           },
-          disregard: false,
         },
       });
 
@@ -70,11 +78,13 @@ export async function POST(request: NextRequest) {
           reasons: {
             has: "spam",
           },
-          createdAt: {
-            gte: start,
-            lte: end,
+          AND: {
+            createdAt: {
+              gte: start,
+              lte: end,
+            },
+            disregard: false,
           },
-          disregard: false,
         },
       });
 
@@ -83,11 +93,13 @@ export async function POST(request: NextRequest) {
           reasons: {
             has: "suicidal or self injury",
           },
-          createdAt: {
-            gte: start,
-            lte: end,
+          AND: {
+            createdAt: {
+              gte: start,
+              lte: end,
+            },
+            disregard: false,
           },
-          disregard: false,
         },
       });
 
@@ -96,11 +108,13 @@ export async function POST(request: NextRequest) {
           reasons: {
             has: "violence",
           },
-          createdAt: {
-            gte: start,
-            lte: end,
+          AND: {
+            createdAt: {
+              gte: start,
+              lte: end,
+            },
+            disregard: false,
           },
-          disregard: false,
         },
       });
 
@@ -109,11 +123,13 @@ export async function POST(request: NextRequest) {
           reasons: {
             has: "something else",
           },
-          createdAt: {
-            gte: start,
-            lte: end,
+          AND: {
+            createdAt: {
+              gte: start,
+              lte: end,
+            },
+            disregard: false,
           },
-          disregard: false,
         },
       });
 
