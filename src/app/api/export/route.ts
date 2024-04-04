@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (session) {
-      let reports = await prisma.post.findMany({
+      const reports = await prisma.post.findMany({
         where: {
           reports: {
             some: {
@@ -49,9 +49,13 @@ export async function POST(request: NextRequest) {
           },
           user: true,
         },
+        distinct: ["id"],
+        orderBy: {
+          createdAt: "asc",
+        },
       });
 
-      let reportsLow = await prisma.post.findMany({
+      const reportsLow = await prisma.post.findMany({
         where: {
           reports: {
             some: {
@@ -98,9 +102,13 @@ export async function POST(request: NextRequest) {
           user: true,
         },
         distinct: ["id"],
+
+        orderBy: {
+          createdAt: "asc",
+        },
       });
 
-      if (reports) {
+      if (reports || reportsLow) {
         return NextResponse.json({ high: reports, low: reportsLow });
       } else {
         return NextResponse.json({ msg: "No reports found" });

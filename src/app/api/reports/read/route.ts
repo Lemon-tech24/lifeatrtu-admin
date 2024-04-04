@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({ ok: true, list: data });
     } else {
-      return NextResponse.json({ message: "UNAUTHORIZED" }, { status: 401 });
+      return NextResponse.json({ok:false, message: "UNAUTHORIZED" }, { status: 401 });
     }
   } catch (err) {
     throw new Error("Error");

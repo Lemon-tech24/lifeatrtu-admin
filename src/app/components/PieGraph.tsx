@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-const COLORS = [
+export const COLORS = [
   "#637A9F",
   "#FFF3CF",
   "#FFE7CC",
@@ -19,7 +19,44 @@ const COLORS = [
   "#ED9761",
 ];
 
-const CustomLegend = ({ payload }: any) => {
+export const renderCustomizedLabel = ({
+  cx,
+  cy,
+  midAngle,
+  innerRadius,
+  outerRadius,
+  value,
+  name,
+  percent,
+}: any) => {
+  if (percent === 0) {
+    return null;
+  }
+
+  const RADIAN = Math.PI / 180;
+  const radius = 1.08 * outerRadius;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  return (
+    <text
+      x={x}
+      y={y}
+      fill="#000000"
+      textAnchor={x > cx ? "start" : "end"}
+      dominantBaseline="central"
+      className="text-ellipsis line-clamp-1"
+      fontSize={10}
+      fontWeight={700}
+    >
+      <tspan x={x} dy={12}>
+        {`${(percent * 100).toFixed(0)}%`}
+      </tspan>
+    </text>
+  );
+};
+
+export const CustomLegendPie = ({ payload }: any) => {
   const firstRowData = payload.slice(0, 4);
   const secondRowData = payload.slice(4);
 
@@ -141,7 +178,7 @@ const PieGraph = ({ data }: any) => {
             props.payload.percent,
           ]}
         />
-        <Legend content={<CustomLegend />} />
+        <Legend content={<CustomLegendPie />} />
       </PieChart>
     </ResponsiveContainer>
   );

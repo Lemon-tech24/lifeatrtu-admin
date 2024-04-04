@@ -10,10 +10,12 @@ import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import {
   Document,
+  Image,
   Page,
   PDFDownloadLink,
   PDFViewer,
   StyleSheet,
+  Svg,
   Text,
   usePDF,
   View,
@@ -27,8 +29,13 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   LabelList,
   Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
   Rectangle,
   ResponsiveContainer,
   XAxis,
@@ -36,6 +43,7 @@ import {
 } from "recharts";
 import moment from "moment";
 import BarGraph, { CustomLegend } from "../BarGraph";
+import { COLORS, CustomLegendPie, renderCustomizedLabel } from "../PieGraph";
 
 const tableData = [
   {
@@ -127,6 +135,81 @@ const ExportData = () => {
     }
   };
 
+  const getBarData = async () => {
+    const { startDate, endDate } = selectionRange;
+
+    try {
+      if (startDate && endDate) {
+        const startUTC8 = moment(startDate).utcOffset("+08:00").toISOString();
+        const endUTC8 = moment(endDate).utcOffset("+08:00").toISOString();
+
+        const response = await axios.post("/api/reports/read", {
+          start: startUTC8,
+          end: endUTC8,
+        });
+
+        const combineDataByDate = (data: any) => {
+          const combinedData: any = {};
+          data.forEach((item: any) => {
+            if (!combinedData[item.date]) {
+              combinedData[item.date] = {
+                date: item.date,
+                highRisk: 0,
+                lowRisk: 0,
+              };
+            }
+            combinedData[item.date].highRisk += item.highRisk;
+            combinedData[item.date].lowRisk += item.lowRisk;
+          });
+          return Object.values(combinedData);
+        };
+
+        const data = response.data;
+
+        if (data && data.ok) {
+          const newData = combineDataByDate(data.list);
+          return newData;
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  };
+
+  const getPieDAta = async () => {
+    const { startDate, endDate } = selectionRange;
+
+    try {
+      if (startDate && endDate) {
+        const startUTC8 = moment(startDate).utcOffset("+08:00").toISOString();
+        const endUTC8 = moment(endDate).utcOffset("+08:00").toISOString();
+
+        const response = await axios.post("/api/reports/read/count", {
+          start: startUTC8,
+          end: endUTC8,
+        });
+
+        const data = response.data;
+
+        if (data && data.ok) {
+          return data.pieData;
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  };
+
+  const bar = useRequest(getBarData, {
+    refreshDeps: [session, selectionRange],
+  });
+
+  const pie = useRequest(getPieDAta, {
+    refreshDeps: [session, selectionRange],
+  });
+
   const { data, loading } = useRequest(getHighRisk, {
     refreshDeps: [session, selectionRange],
   });
@@ -134,7 +217,6 @@ const ExportData = () => {
   const styles = StyleSheet.create({
     page: {
       flexDirection: "row",
-      backgroundColor: "#E4E4E4",
       padding: 10,
     },
     section: {
@@ -150,21 +232,21 @@ const ExportData = () => {
 
     tableRow: {
       flexDirection: "row",
-      height: 40, // Set a fixed height for each row
+      height: 40,
     },
     tableColHeader: {
-      width: "20%", // Adjusted width for each column header
+      width: "20%",
       borderStyle: "solid",
       borderWidth: 1,
       textAlign: "center",
       fontWeight: "bold",
     },
     tableCell: {
-      width: "20%", // Adjusted width for each cell
+      width: "20%",
       borderStyle: "solid",
       borderWidth: 1,
       textAlign: "center",
-      fontSize: 10, // Set font size to 10px
+      fontSize: 10,
     },
   });
 
@@ -173,8 +255,8 @@ const ExportData = () => {
       <View style={styles.section}>
         <Text>
           High Risk Category from{" "}
-          {moment(selectionRange.startDate).format("ll")} to{" "}
-          {moment(selectionRange.endDate).format("ll")}
+          {moment(selectionRange.startDate).utcOffset("+08:00").format("ll")} to{" "}
+          {moment(selectionRange.endDate).utcOffset("+08:00").format("ll")}
         </Text>
         <View style={styles.table}>
           <View style={styles.tableRow}>
@@ -229,8 +311,9 @@ const ExportData = () => {
     <Page size="A4" style={styles.page} orientation="landscape">
       <View style={styles.section}>
         <Text>
-          Low Risk Category from {moment(selectionRange.startDate).format("ll")}{" "}
-          to {moment(selectionRange.endDate).format("ll")}
+          Low Risk Category from{" "}
+          {moment(selectionRange.startDate).utcOffset("+08:00").format("ll")} to{" "}
+          {moment(selectionRange.endDate).utcOffset("+08:00").format("ll")}
         </Text>
         <View style={styles.table}>
           <View style={styles.tableRow}>
@@ -254,7 +337,6 @@ const ExportData = () => {
             </View>
           </View>
           {data.map((item: any, index: any) => {
-            console.log(item);
             return (
               <View key={index} style={styles.tableRow}>
                 <View style={styles.tableCell}>
@@ -280,14 +362,131 @@ const ExportData = () => {
     </Page>
   );
 
+  const BarA = ({ data }: any) => {
+    return (
+      <Page size="A4" style={styles.page} orientation="landscape">
+        <View style={styles.section}>
+          <Text>
+            High/Low Risk Graph from{" "}
+            {moment(selectionRange.startDate).utcOffset("+08:00").format("ll")}{" "}
+            to {moment(selectionRange.endDate).utcOffset("+08:00").format("ll")}
+          </Text>
+
+          <ReactPDFChart>
+            <BarChart
+              width={800}
+              height={500}
+              data={data}
+              margin={{
+                top: 5,
+                right: 30,
+                left: -35,
+                bottom: 5,
+              }}
+            >
+              <XAxis dataKey="date" className="text-xs" interval={0} />
+              <YAxis
+                allowDecimals={false}
+                tickCount={10}
+                className="text-base"
+              />
+
+              <Legend align="center" />
+              <Bar
+                dataKey="lowRisk"
+                fill="#289dd2"
+                activeBar={<Rectangle fill="pink" stroke="blue" />}
+                radius={[20, 20, 0, 0]}
+                isAnimationActive={false}
+              >
+                <LabelList
+                  dataKey="lowRisk"
+                  position={"top"}
+                  className="text-xl"
+                  fontWeight={"bold"}
+                />
+              </Bar>
+              <Bar
+                dataKey="highRisk"
+                fill="#E8C872"
+                activeBar={<Rectangle fill="pink" stroke="blue" />}
+                radius={[20, 20, 0, 0]}
+                isAnimationActive={false}
+              >
+                <LabelList
+                  dataKey="highRisk"
+                  position={"top"}
+                  className="text-xl"
+                  fontWeight={"bold"}
+                />
+              </Bar>
+            </BarChart>
+          </ReactPDFChart>
+        </View>
+      </Page>
+    );
+  };
+
+  const PieA = ({ data }: any) => {
+    console.log(data);
+    return (
+      <Page size="A4" style={styles.page} orientation="landscape">
+        <View style={styles.section}>
+          <Text>
+            Reports Graph from{" "}
+            {moment(selectionRange.startDate).utcOffset("+08:00").format("ll")}{" "}
+            to {moment(selectionRange.endDate).utcOffset("+08:00").format("ll")}
+          </Text>
+
+          <View
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <ReactPDFChart>
+              <PieChart
+                width={500}
+                height={500}
+                margin={{ left: 0, right: -100, bottom: 0, top: 0 }}
+              >
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={renderCustomizedLabel}
+                  isAnimationActive={false}
+                >
+                  {data.map((entry: any, index: any) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+
+                <Legend />
+              </PieChart>
+            </ReactPDFChart>
+          </View>
+        </View>
+      </Page>
+    );
+  };
+
   const AuditReportPDF = ({ data }: any) =>
     data && (
       <Document>
         {data.high.length !== 0 && <HighAudit data={data.high} />}
         {data.low.length !== 0 && <LowAudit data={data.low} />}
+        {bar.data && bar.data.length !== 0 && <BarA data={bar.data} />}
+        {pie.data && pie.data.length !== 0 && <PieA data={pie.data} />}
       </Document>
     );
-
   return (
     hydrate && (
       <div className="fixed top-0 left-0 w-full h-screen bg-slate-500/80 z-50 flex items-center justify-center">
@@ -310,19 +509,22 @@ const ExportData = () => {
             </div>
 
             <div className="flex flex-col items-center justify-start w-full gap-2">
-              {loading && <span className="loading loading-dots w-20"></span>}
+              {(loading || bar.loading || pie.loading) && (
+                <span className="loading loading-dots w-20"></span>
+              )}
               {data &&
                 data !== 0 &&
-                !loading &&
-                (data.high.length !== 0 || data.low.length !== 0) && (
+                (!loading || !bar.loading || !pie.loading) &&
+                (data.high.length !== 0 ||
+                data.low.length !== 0 ||
+                bar.data?.length !== 0 ||
+                pie.data.length !== 0 ? (
                   <PDFViewer height="500px" width="100%">
                     <AuditReportPDF data={data} />
                   </PDFViewer>
-                )}
-
-              {!loading && data.high.length === 0 && data.low.length === 0 && (
-                <>No Data</>
-              )}
+                ) : (
+                  <div className="text-xl font-semibold">No Data</div>
+                ))}
             </div>
           </div>
 
