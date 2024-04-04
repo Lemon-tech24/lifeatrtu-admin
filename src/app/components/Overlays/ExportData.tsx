@@ -364,117 +364,126 @@ const ExportData = () => {
 
   const BarA = ({ data }: any) => {
     return (
-      <Page size="A4" style={styles.page} orientation="landscape">
-        <View style={styles.section}>
-          <Text>
-            High/Low Risk Graph from{" "}
-            {moment(selectionRange.startDate).utcOffset("+08:00").format("ll")}{" "}
-            to {moment(selectionRange.endDate).utcOffset("+08:00").format("ll")}
-          </Text>
+      data && (
+        <Page size="A4" style={styles.page} orientation="landscape">
+          <View style={styles.section}>
+            <Text>
+              High/Low Risk Graph from{" "}
+              {moment(selectionRange.startDate)
+                .utcOffset("+08:00")
+                .format("ll")}{" "}
+              to{" "}
+              {moment(selectionRange.endDate).utcOffset("+08:00").format("ll")}
+            </Text>
 
-          <ReactPDFChart>
-            <BarChart
-              width={800}
-              height={500}
-              data={data}
-              margin={{
-                top: 5,
-                right: 30,
-                left: -35,
-                bottom: 5,
-              }}
-            >
-              <XAxis dataKey="date" className="text-xs" interval={0} />
-              <YAxis
-                allowDecimals={false}
-                tickCount={10}
-                className="text-base"
-              />
-
-              <Legend align="center" />
-              <Bar
-                dataKey="lowRisk"
-                fill="#289dd2"
-                activeBar={<Rectangle fill="pink" stroke="blue" />}
-                radius={[20, 20, 0, 0]}
-                isAnimationActive={false}
+            <ReactPDFChart>
+              <BarChart
+                width={800}
+                height={500}
+                data={data}
+                margin={{
+                  top: 5,
+                  right: 30,
+                  left: -35,
+                  bottom: 5,
+                }}
               >
-                <LabelList
+                <XAxis dataKey="date" className="text-xs" interval={0} />
+                <YAxis
+                  allowDecimals={false}
+                  tickCount={10}
+                  className="text-base"
+                />
+
+                <Legend align="center" />
+                <Bar
                   dataKey="lowRisk"
-                  position={"top"}
-                  className="text-xl"
-                  fontWeight={"bold"}
-                />
-              </Bar>
-              <Bar
-                dataKey="highRisk"
-                fill="#E8C872"
-                activeBar={<Rectangle fill="pink" stroke="blue" />}
-                radius={[20, 20, 0, 0]}
-                isAnimationActive={false}
-              >
-                <LabelList
+                  fill="#289dd2"
+                  activeBar={<Rectangle fill="pink" stroke="blue" />}
+                  radius={[20, 20, 0, 0]}
+                  isAnimationActive={false}
+                >
+                  <LabelList
+                    dataKey="lowRisk"
+                    position={"top"}
+                    className="text-xl"
+                    fontWeight={"bold"}
+                  />
+                </Bar>
+                <Bar
                   dataKey="highRisk"
-                  position={"top"}
-                  className="text-xl"
-                  fontWeight={"bold"}
-                />
-              </Bar>
-            </BarChart>
-          </ReactPDFChart>
-        </View>
-      </Page>
+                  fill="#E8C872"
+                  activeBar={<Rectangle fill="pink" stroke="blue" />}
+                  radius={[20, 20, 0, 0]}
+                  isAnimationActive={false}
+                >
+                  <LabelList
+                    dataKey="highRisk"
+                    position={"top"}
+                    className="text-xl"
+                    fontWeight={"bold"}
+                  />
+                </Bar>
+              </BarChart>
+            </ReactPDFChart>
+          </View>
+        </Page>
+      )
     );
   };
 
   const PieA = ({ data }: any) => {
-    console.log(data);
     return (
-      <Page size="A4" style={styles.page} orientation="landscape">
-        <View style={styles.section}>
-          <Text>
-            Reports Graph from{" "}
-            {moment(selectionRange.startDate).utcOffset("+08:00").format("ll")}{" "}
-            to {moment(selectionRange.endDate).utcOffset("+08:00").format("ll")}
-          </Text>
+      data && (
+        <Page size="A4" style={styles.page} orientation="landscape">
+          <View style={styles.section}>
+            <Text>
+              Reports Graph from{" "}
+              {moment(selectionRange.startDate)
+                .utcOffset("+08:00")
+                .format("ll")}{" "}
+              to{" "}
+              {moment(selectionRange.endDate).utcOffset("+08:00").format("ll")}
+            </Text>
 
-          <View
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <ReactPDFChart>
-              <PieChart
-                width={500}
-                height={500}
-                margin={{ left: 0, right: -100, bottom: 0, top: 0 }}
-              >
-                <Pie
-                  data={data}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={renderCustomizedLabel}
-                  isAnimationActive={false}
+            <View
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <ReactPDFChart>
+                <PieChart
+                  width={500}
+                  height={500}
+                  margin={{ left: 0, right: -100, bottom: 0, top: 0 }}
                 >
-                  {data.map((entry: any, index: any) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
+                  <Pie
+                    data={data}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    fill="#8884d8"
+                    dataKey="value"
+                    label={renderCustomizedLabel}
+                    isAnimationActive={false}
+                  >
+                    {data.map((entry: any, index: any) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
 
-                <Legend />
-              </PieChart>
-            </ReactPDFChart>
+                  <Legend />
+                </PieChart>
+              </ReactPDFChart>
+            </View>
           </View>
-        </View>
-      </Page>
+        </Page>
+      )
     );
   };
 
@@ -484,7 +493,9 @@ const ExportData = () => {
         {data.high.length !== 0 && <HighAudit data={data.high} />}
         {data.low.length !== 0 && <LowAudit data={data.low} />}
         {bar.data && bar.data.length !== 0 && <BarA data={bar.data} />}
-        {bar.data && bar.data.length !== 0 && <PieA data={pie.data} />}
+        {bar.data && bar.data.length !== 0 && pie.data && (
+          <PieA data={pie.data} />
+        )}
       </Document>
     );
   return (
@@ -512,12 +523,13 @@ const ExportData = () => {
               {(loading || bar.loading || pie.loading) && (
                 <span className="loading loading-dots w-20"></span>
               )}
-              {data &&
+              {!loading &&
+                data &&
                 data !== 0 &&
                 (!loading || !bar.loading || !pie.loading) &&
                 (data.high.length !== 0 ||
                 data.low.length !== 0 ||
-                (bar.data && bar.data.length !== 0) ? (
+                (bar.data && bar.data.length !== 0 && pie.data) ? (
                   <PDFViewer height="500px" width="100%">
                     <AuditReportPDF data={data} />
                   </PDFViewer>
