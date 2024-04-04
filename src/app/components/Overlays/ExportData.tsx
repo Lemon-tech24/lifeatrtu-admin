@@ -484,7 +484,7 @@ const ExportData = () => {
         {data.high.length !== 0 && <HighAudit data={data.high} />}
         {data.low.length !== 0 && <LowAudit data={data.low} />}
         {bar.data && bar.data.length !== 0 && <BarA data={bar.data} />}
-        {pie.data && pie.data.length !== 0 && <PieA data={pie.data} />}
+        {bar.data && bar.data.length !== 0 && <PieA data={pie.data} />}
       </Document>
     );
   return (
@@ -517,8 +517,7 @@ const ExportData = () => {
                 (!loading || !bar.loading || !pie.loading) &&
                 (data.high.length !== 0 ||
                 data.low.length !== 0 ||
-                bar.data?.length !== 0 ||
-                pie.data.length !== 0 ? (
+                (bar.data && bar.data.length !== 0) ? (
                   <PDFViewer height="500px" width="100%">
                     <AuditReportPDF data={data} />
                   </PDFViewer>
