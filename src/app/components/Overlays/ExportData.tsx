@@ -10,30 +10,23 @@ import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
 import {
   Document,
-  Image,
   Page,
   PDFDownloadLink,
   PDFViewer,
   StyleSheet,
-  Svg,
   Text,
-  usePDF,
   View,
 } from "@react-pdf/renderer";
 import { useSession } from "next-auth/react";
 import axios from "axios";
 import { useRequest } from "ahooks";
-import toast from "react-hot-toast";
 import ReactPDFChart from "react-pdf-charts";
 import {
   Bar,
   BarChart,
-  CartesianGrid,
   Cell,
   LabelList,
   Legend,
-  Line,
-  LineChart,
   Pie,
   PieChart,
   Rectangle,
@@ -42,32 +35,7 @@ import {
   YAxis,
 } from "recharts";
 import moment from "moment";
-import BarGraph, { CustomLegend } from "../BarGraph";
-import { COLORS, CustomLegendPie, renderCustomizedLabel } from "../PieGraph";
-
-const tableData = [
-  {
-    email: "user1@example.com",
-    title: "Post 1",
-    focus: "Focus 1",
-    content: "asd asdasdasdasdas dsdasd asda",
-    riskCategory: "Low",
-  },
-  {
-    email: "user2@example.com",
-    title: "Post 2",
-    focus: "Focus 2",
-    content: "Content 2",
-    riskCategory: "Medium",
-  },
-  {
-    email: "user3@example.com",
-    title: "Post 3",
-    focus: "Focus 3",
-    content: "Content 3",
-    riskCategory: "High",
-  },
-];
+import { COLORS, renderCustomizedLabel } from "../PieGraph";
 
 interface Range {
   startDate: Date;
@@ -486,6 +454,19 @@ const ExportData = () => {
       )
     );
   };
+  const [width, setWidth] = useState<number>(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWidth(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   const AuditReportPDF = ({ data }: any) =>
     data && (
@@ -502,15 +483,15 @@ const ExportData = () => {
     hydrate && (
       <div className="fixed top-0 left-0 w-full h-screen bg-slate-500/80 z-50 flex items-center justify-center">
         <div
-          className="w-9/12 rounded-xl gap-10 p-6"
+          className="w-9/12 rounded-xl gap-10 p-6 2xl:w-11/12 lg:p-2 md:w-full md:h-full md:rounded-none"
           style={{ backgroundColor: "#D9D9D9" }}
         >
           <div className="w-full flex items-center justify-center uppercase text-3xl font-semibold">
             Export Data
           </div>
 
-          <div className="w-full flex items-center justify-center px-2 gap-4">
-            <div className="flex flex-col items-center justify-start w-full gap-2">
+          <div className="w-full flex items-center justify-center px-2 gap-4 md:flex-col">
+            <div className="flex flex-col items-center justify-start w-full gap-2 h-1/2 overflow-auto">
               <DateRangePicker
                 className="w-full h-full flex justify-center"
                 ranges={[selectionRange]}
@@ -530,7 +511,12 @@ const ExportData = () => {
                 (data.high.length !== 0 ||
                 data.low.length !== 0 ||
                 (bar.data && bar.data.length !== 0 && pie.data) ? (
-                  <PDFViewer height="500px" width="100%">
+                  <PDFViewer
+                    style={{
+                      width: "100%",
+                      height: width < 767 ? "400px" : "500px",
+                    }}
+                  >
                     <AuditReportPDF data={data} />
                   </PDFViewer>
                 ) : (
@@ -540,6 +526,28 @@ const ExportData = () => {
           </div>
 
           <div className="w-full flex items-center justify-center gap-4 mt-4">
+            {!loading &&
+              data &&
+              data !== 0 &&
+              (!loading || !bar.loading || !pie.loading) &&
+              (data.high.length !== 0 ||
+                data.low.length !== 0 ||
+                (bar.data && bar.data.length !== 0 && pie.data)) && (
+                <button
+                  className="text-lg font-semibold rounded-lg px-2 bg-green-700"
+                  disabled={loading || bar.loading || pie.loading}
+                >
+                  <PDFDownloadLink
+                    document={<AuditReportPDF data={data} />}
+                    fileName={`LifeAtRTU_${moment(selectionRange.startDate).format("ll")}_to_${moment(selectionRange.endDate).format("ll")}`}
+                  >
+                    {({ loading }) =>
+                      loading ? "Loading document..." : "Download PDF"
+                    }
+                  </PDFDownloadLink>
+                </button>
+              )}
+
             <button
               className="text-lg font-semibold rounded-lg px-2"
               style={{ backgroundColor: "#FF3F3F" }}

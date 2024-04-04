@@ -65,4 +65,30 @@ nextjs-portal {
   .bm-overlay {
     display: block;
   }
+
+  .rdrDateRangePickerWrapper {
+    flex-direction: column;
+  }
+
+  .rdrDefinedRangesWrapper {
+    width: unset !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .rdrDateRangePickerWrapper {
+    flex-direction: unset;
+  }
+  .rdrDefinedRangesWrapper {
+    width: 226px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .rdrDefinedRangesWrapper {
+    display: none !important;
+  }
+  .rdrCalendarWrapper {
+    padding: 10px !important;
+  }
 }
