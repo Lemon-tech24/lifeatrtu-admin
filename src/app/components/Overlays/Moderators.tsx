@@ -2,7 +2,7 @@ import { isOpenModerators, isOpenSettings } from "@/app/lib/useStore";
 import { useRequest } from "ahooks";
 import axios from "axios";
 import { useSession } from "next-auth/react";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import bcrypt from "bcrypt";
 import { MdDelete } from "react-icons/md";
 import toast from "react-hot-toast";
@@ -12,21 +12,19 @@ const Moderators = () => {
   const settings = isOpenSettings();
   const { data: session } = useSession();
   const [keyword, setKeyword] = useState<boolean>(false);
+  const controllerRef = useRef<AbortController>(new AbortController());
+  const [disable, setDisabled] = useState<boolean>(false);
+  const [disableBTN, setDisabledBTN] = useState<boolean>(false);
 
   const getMods = async () => {
-    const controller = new AbortController();
     try {
-      const response = await axios.post("/api/moderator", {
-        signal: controller.signal,
-      });
+      const response = await axios.post("/api/moderator");
 
       const data = response.data;
 
       if (data.ok) {
         return data.mods;
       }
-
-      controller.abort();
     } catch (err) {
       console.error(err);
     }
@@ -36,28 +34,57 @@ const Moderators = () => {
     refreshDeps: [session, keyword],
   });
 
+  useEffect(() => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+    }
+    controllerRef.current = new AbortController();
+    return () => controllerRef.current?.abort();
+  }, [session]);
+
   const deleteMod = async (id: string) => {
     const loadingId = toast.loading("Deleting Moderator...");
-    try {
-      const response = await axios.post("/api/moderator/delete", {
-        id: id,
-      });
 
-      const data = response.data;
+    const { signal } = controllerRef.current;
 
-      if (data.ok) {
-        toast.dismiss(loadingId);
-        toast.success("Removed as Moderator");
-      } else {
-        toast.dismiss(loadingId);
-        toast.error("Error occured");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.dismiss(loadingId);
+    if (disable) {
+      toast.error("Please Wait");
     }
 
-    setKeyword(!keyword);
+    setDisabled(true);
+
+    setTimeout(() => {
+      setDisabledBTN(true);
+      axios
+        .post(
+          "/api/moderator/delete",
+          {
+            id: id,
+          },
+          { signal: signal }
+        )
+        .then((response) => {
+          const data = response.data;
+          if (data.ok) {
+            toast.success("Removed as Moderator");
+            setKeyword(!keyword);
+          } else {
+            toast.error("Failed To remove Moderator");
+          }
+        })
+        .catch((err) => {
+          if (err.name === "CanceledError") {
+            toast.error("Canceled");
+          }
+
+          toast.error("Error Occured");
+        })
+        .finally(() => {
+          toast.dismiss(loadingId);
+          setDisabled(false);
+          setDisabledBTN(false);
+        });
+    }, 500);
   };
 
   return (
@@ -104,6 +131,7 @@ const Moderators = () => {
                         type="button"
                         className="text-2xl text-red-500"
                         onClick={() => deleteMod(item.id)}
+                        disabled={disable || loading || disableBTN}
                       >
                         <MdDelete />
                       </button>
@@ -115,13 +143,14 @@ const Moderators = () => {
         )}
         <div className="w-full flex items-center justify-center">
           <button
-            className="text-xl px-4 rounded-xl text-black xl:text-lg xl:px-2 sm:text-sm"
+            className={`text-xl px-4 rounded-xl text-black xl:text-lg xl:px-2 sm:text-sm ${disableBTN && "hidden"}`}
             style={{ backgroundColor: "#FF3F3F" }}
             onClick={() => {
+              controllerRef.current.abort();
               mods.close();
               settings.open();
             }}
-            disabled={loading}
+            disabled={loading || disable || disableBTN}
           >
             Close
           </button>
