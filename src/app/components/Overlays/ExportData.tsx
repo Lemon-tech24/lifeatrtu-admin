@@ -422,11 +422,7 @@ const ExportData = () => {
               }}
             >
               <ReactPDFChart>
-                <PieChart
-                  width={500}
-                  height={500}
-                  margin={{ left: 0, right: -100, bottom: 0, top: 0 }}
-                >
+                <PieChart width={800} height={500}>
                   <Pie
                     data={data}
                     cx="50%"

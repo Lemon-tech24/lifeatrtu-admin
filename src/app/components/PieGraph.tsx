@@ -49,7 +49,7 @@ export const renderCustomizedLabel = ({
       fontSize={10}
       fontWeight={700}
     >
-      <tspan x={x} dy={12}>
+      <tspan x={x} dy="12px">
         {`${(percent * 100).toFixed(0)}%`}
       </tspan>
     </text>
