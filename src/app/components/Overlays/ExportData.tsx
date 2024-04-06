@@ -496,7 +496,9 @@ const ExportData = () => {
               />
             </div>
 
-            <div className="flex flex-col items-center justify-start w-full gap-2">
+            <div
+              className={`flex flex-col items-center justify-start w-full gap-2 xs:hidden`}
+            >
               {(loading || bar.loading || pie.loading) && (
                 <span className="loading loading-dots w-20"></span>
               )}
@@ -522,27 +524,28 @@ const ExportData = () => {
           </div>
 
           <div className="w-full flex items-center justify-center gap-4 mt-4">
-            {!loading &&
-              data &&
-              data !== 0 &&
-              (!loading || !bar.loading || !pie.loading) &&
-              (data.high.length !== 0 ||
-                data.low.length !== 0 ||
-                (bar.data && bar.data.length !== 0 && pie.data)) && (
-                <button
-                  className="text-lg font-semibold rounded-lg px-2 bg-green-700"
-                  disabled={loading || bar.loading || pie.loading}
+            {data &&
+            data !== 0 &&
+            (!loading || !bar.loading || !pie.loading) &&
+            (data.high.length !== 0 ||
+              data.low.length !== 0 ||
+              (bar.data && bar.data.length !== 0 && pie.data)) ? (
+              <button
+                className="text-lg font-semibold rounded-lg px-2 bg-green-700"
+                disabled={loading || bar.loading || pie.loading}
+              >
+                <PDFDownloadLink
+                  document={<AuditReportPDF data={data} />}
+                  fileName={`LifeAtRTU_${moment(selectionRange.startDate).format("ll")}_to_${moment(selectionRange.endDate).format("ll")}`}
                 >
-                  <PDFDownloadLink
-                    document={<AuditReportPDF data={data} />}
-                    fileName={`LifeAtRTU_${moment(selectionRange.startDate).format("ll")}_to_${moment(selectionRange.endDate).format("ll")}`}
-                  >
-                    {({ loading }) =>
-                      loading ? "Loading document..." : "Download PDF"
-                    }
-                  </PDFDownloadLink>
-                </button>
-              )}
+                  {({ loading }) =>
+                    loading ? "Loading document..." : "Download PDF"
+                  }
+                </PDFDownloadLink>
+              </button>
+            ) : (
+              <div className="text-xl font-semibold">No Data</div>
+            )}
 
             <button
               className="text-lg font-semibold rounded-lg px-2"
