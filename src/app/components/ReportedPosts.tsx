@@ -1,14 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useState, useRef, useEffect } from "react";
 import { useInfiniteScroll } from "ahooks";
-import { useSession } from "next-auth/react";
 import axios from "axios";
-import Skeleton from "./UI/Skeleton";
-import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
-import moment from "moment";
-import { CgProfile } from "react-icons/cg";
+import { useSession } from "next-auth/react";
+import React, { useState, useRef, useEffect } from "react";
 import {
-  isApproveDelete,
+  DisregardReport,
+  isMarkAsDone,
   isOpenBanAccount,
   isOpenImage,
   isOpenReport,
@@ -16,26 +13,32 @@ import {
   useCategorize,
   useMultipleSelect,
 } from "../lib/useStore";
-import { IoIosWarning } from "react-icons/io";
-import { FaCommentAlt } from "react-icons/fa";
+import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import toast from "react-hot-toast";
-import MultipleSelect from "./MultipleSelect";
+import { FaCommentAlt } from "react-icons/fa";
+import Skeleton from "./UI/Skeleton";
+import { IoIosWarning } from "react-icons/io";
+import { BsIncognito } from "react-icons/bs";
+import { CgProfile } from "react-icons/cg";
+import moment from "moment";
 import Categorize from "./Overlays/Categorize";
 
-const PendingDelete = () => {
-  const { data: session } = useSession();
+const ReportedPosts = () => {
   const [select, setSelect] = useState<string>("most");
 
-  const controllerRef = useRef(new AbortController());
   const [disabled, setDisabled] = useState<boolean>(false);
   const [disableBTN, setDisabledBTN] = useState<boolean>(false);
 
+  const { data: session } = useSession();
   const reference = useRef<HTMLDivElement>(null);
+  const controllerRef = useRef(new AbortController());
+
   const image = isOpenImage();
   const report = isOpenReport();
   const update = isOpenUpdates();
-  const approve = isApproveDelete();
+  const markDone = isMarkAsDone();
   const ban = isOpenBanAccount();
+  const disregard = DisregardReport();
   const selection = useMultipleSelect();
   const categorize = useCategorize();
 
@@ -49,7 +52,7 @@ const PendingDelete = () => {
 
   const getPosts = async (skip: any, take: number) => {
     try {
-      const response = await axios.post("/api/reports/read/pending", {
+      const response = await axios.post("/api/reports/read/reported", {
         skip: skip,
         take: take,
         order: select,
@@ -60,7 +63,6 @@ const PendingDelete = () => {
       if (!data || data === null || data === undefined) {
         throw new Error("Failed to fetch posts: " + data);
       }
-
       const newSkip = data.length < take ? undefined : skip + take;
 
       return {
@@ -73,62 +75,12 @@ const PendingDelete = () => {
     }
   };
 
-  const { data, loading, loadingMore, noMore, reload } = useInfiniteScroll(
-    (d) => getPosts(d?.skip ? d?.skip : 0, 10),
-    {
+  const { data, loading, loadingMore, mutate, noMore, reload } =
+    useInfiniteScroll((d) => getPosts(d?.skip ? d?.skip : 0, 10), {
       target: reference,
       isNoMore: (d) => d?.skip === undefined,
       reloadDeps: [session, select, ban.value],
-    }
-  );
-
-  const approveDelete = (postId: string) => {
-    const loadingId = toast.loading("Deleting...");
-    const { signal } = controllerRef.current;
-
-    if (disabled) {
-      toast.error("Please Wait");
-    }
-
-    setDisabledBTN(true);
-
-    setTimeout(() => {
-      setDisabled(true);
-      axios
-        .post("/api/delete", { postId: postId }, { signal: signal })
-        .then((response) => {
-          const data = response.data;
-
-          if (data.ok) {
-            toast.success("Successfully Deleted");
-            reload();
-          } else {
-            toast.error("Failed To Delete");
-            throw new Error();
-          }
-        })
-        .catch((err) => {
-          if (err.name === "CanceledError") {
-            toast.error("Canceled");
-          }
-          toast.error("Error Occurred");
-        })
-        .finally(() => {
-          toast.dismiss(loadingId);
-          setDisabled(false);
-          setDisabledBTN(false);
-        });
-    }, 500);
-  };
-
-  const checkboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, checked } = e.target;
-    if (checked) {
-      selection.setList([...selection.list, value]);
-    } else {
-      selection.setList(selection.list.filter((id) => id !== value));
-    }
-  };
+    });
 
   const sortPostsByReports = (a: any, b: any) => {
     if (!a.reports || !b.reports) return 0;
@@ -141,6 +93,42 @@ const PendingDelete = () => {
     }
   };
 
+  const requestDelete = (postId: string) => {
+    const loadingId = toast.loading("Requesting to Delete...");
+    const { signal } = controllerRef.current;
+    if (disabled) {
+      toast.error("Please Wait");
+    }
+
+    setDisabledBTN(true);
+
+    setTimeout(() => {
+      setDisabled(true);
+      axios
+        .post("/api/request/delete", { postId: postId }, { signal: signal })
+        .then((response) => {
+          const data = response.data;
+
+          if (data.ok) {
+            toast.success("Deletion Request Sent");
+            reload();
+          } else {
+            toast.error("Failed to Request");
+          }
+        })
+        .catch((err) => {
+          if (err.name === "CanceledError") {
+            toast.error("Canceled");
+          }
+          toast.error("Error Occured");
+        })
+        .finally(() => {
+          toast.dismiss(loadingId);
+          setDisabled(false);
+          setDisabledBTN(false);
+        });
+    }, 500);
+  };
   const Disregard = (postId: string) => {
     const loadingId = toast.loading("Processing...");
     const { signal } = controllerRef.current;
@@ -169,6 +157,7 @@ const PendingDelete = () => {
           if (err.name === "CanceledError") {
             toast.error("Canceled");
           }
+
           toast.error("Error Occurred");
         })
         .finally(() => {
@@ -183,16 +172,10 @@ const PendingDelete = () => {
     <>
       {categorize.isOpen && <Categorize reload={reload} />}
       <div className="w-full flex items-center justify-end p-6 gap-2 sm:pr-2">
-        <MultipleSelect
-          reload={reload}
-          loading={loading}
-          loadingMore={loadingMore}
-          tab={"pending"}
-        />
         <select
           className="rounded-xl px-2 text-xl border border-black border-solid shadow-lg md:text-base sm:text-sm"
-          defaultValue={"most"}
           onChange={(e) => setSelect(e.target.value)}
+          defaultValue={"most"}
         >
           <option value="most">Most Report</option>
           <option value="least">Least Report</option>
@@ -222,83 +205,59 @@ const PendingDelete = () => {
                             className="p-2 pl-4 rounded-xl bg-slate-300 shadow-lg"
                           >
                             {/* ----------------------------------------------------------------- */}
-                            <div className="flex items-center justify-end gap-2">
-                              {selection.isOpen ? (
-                                <input
-                                  type="checkbox"
-                                  className="w-4 h-4 accent-black"
-                                  checked={selection.list.includes(item.id)}
-                                  value={item.id}
-                                  onChange={checkboxChange}
-                                  disabled={disabled || disableBTN}
-                                />
+                            <div className="flex items-center justify-end">
+                              {session?.user.role === "mod" ? (
+                                !item.pending ? (
+                                  <button
+                                    className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                    onClick={() => requestDelete(item.id)}
+                                    disabled={disabled || disableBTN}
+                                  >
+                                    Request to Delete
+                                  </button>
+                                ) : (
+                                  <></>
+                                )
                               ) : (
-                                <>
-                                  <button
-                                    type="button"
-                                    className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                                    disabled={
-                                      loading ||
-                                      loadingMore ||
-                                      disabled ||
-                                      disableBTN
-                                    }
-                                    onClick={() => {
-                                      categorize.setPostId(item.id);
-                                      categorize.open();
-                                    }}
-                                  >
-                                    Categorize
-                                  </button>
-
-                                  <button
-                                    type="button"
-                                    className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                                    disabled={
-                                      loading ||
-                                      loadingMore ||
-                                      disabled ||
-                                      disableBTN
-                                    }
-                                    onClick={() => {
-                                      approve.setPostId(item.id);
-
-                                      if (item.id === approve.postId) {
-                                        approveDelete(approve.postId);
-                                      }
-                                    }}
-                                  >
-                                    Approve
-                                  </button>
-                                  <button
-                                    className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                                    onClick={() => Disregard(item.id)}
-                                    disabled={
-                                      loading ||
-                                      loadingMore ||
-                                      disabled ||
-                                      disableBTN
-                                    }
-                                  >
-                                    Disregard
-                                  </button>
-                                  <button
-                                    className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                                    onClick={() => {
-                                      ban.setEmail(item.user.email);
-                                      ban.setUserId(item.user.id);
-                                      ban.open();
-                                    }}
-                                    disabled={
-                                      loading ||
-                                      loadingMore ||
-                                      disabled ||
-                                      disableBTN
-                                    }
-                                  >
-                                    Ban
-                                  </button>
-                                </>
+                                !loading && (
+                                  <div className="flex items-center gap-2">
+                                    <>
+                                      <button
+                                        type="button"
+                                        className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                        onClick={() => {
+                                          categorize.setPostId(item.id);
+                                          categorize.open();
+                                        }}
+                                        disabled={disabled || disableBTN}
+                                      >
+                                        Categorize
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                        onClick={() => {
+                                          Disregard(item.id);
+                                        }}
+                                        disabled={disabled || disableBTN}
+                                      >
+                                        Disregard
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                        onClick={() => {
+                                          ban.setUserId(item.user.id);
+                                          ban.setEmail(item.user.email);
+                                          ban.open();
+                                        }}
+                                        disabled={disabled || disableBTN}
+                                      >
+                                        Ban
+                                      </button>
+                                    </>
+                                  </div>
+                                )
                               )}
                             </div>
                             {/* ----------------------------------------------------------------- */}
@@ -319,15 +278,29 @@ const PendingDelete = () => {
                             </div>
                             {/* ----------------------------------------------------------------- */}
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 overflow-x-auto">
                               <div className="text-4xl">
                                 <CgProfile />
                               </div>
 
                               <div className="text-xl font-semibold">
-                                {session?.user.role === "mod"
-                                  ? item.anonymous && "Anonymous"
-                                  : item.user.name}
+                                {session?.user.role === "mod" &&
+                                item.anonymous ? (
+                                  "Anonymous"
+                                ) : session?.user.role !== "mod" &&
+                                  item.anonymous ? (
+                                  <div className="flex items-center gap-1">
+                                    {item.user.name}
+                                    <div
+                                      className="text-2xl tooltip tooltip-right font-normal"
+                                      data-tip="Posted as Anonymous"
+                                    >
+                                      <BsIncognito />
+                                    </div>
+                                  </div>
+                                ) : (
+                                  item.user.name
+                                )}
                               </div>
                             </div>
                             {/* ----------------------------------------------------------------- */}
@@ -336,30 +309,27 @@ const PendingDelete = () => {
                               {item.content}
                             </div>
                             {/* ----------------------------------------------------------------- */}
-                            {item.image && (
-                              <div>
+                            {item.image &&
+                              item.image.startsWith("data:image/") && (
                                 <img
                                   src={item.image}
-                                  alt="Post Image"
-                                  className="cursor-pointer"
+                                  alt="image content"
                                   onClick={() => {
                                     image.source(item.image);
                                     image.open();
                                   }}
                                 />
-                              </div>
-                            )}
+                              )}
+
+                            {item.image &&
+                              item.image.startsWith("data:video/") && (
+                                <video controls>
+                                  <source src={item.image} />
+                                </video>
+                              )}
                             {/* ----------------------------------------------------------------- */}
                             <div className="flex w-full items-center justify-center gap-10 mt-8">
-                              <button
-                                className="flex items-center justify-center gap-1"
-                                disabled={
-                                  loading ||
-                                  loadingMore ||
-                                  disabled ||
-                                  disableBTN
-                                }
-                              >
+                              <div className="flex items-center justify-center gap-1">
                                 <div className="text-4xl">
                                   <IoIosWarning />
                                 </div>
@@ -367,10 +337,9 @@ const PendingDelete = () => {
                                   className="text-base font-semibold -mb-3"
                                   style={{ color: "#CA0C0C" }}
                                 >
-                                  {item._count.reports}
-                                  REPORTS
+                                  {item._count.reports} REPORTS
                                 </div>
-                              </button>
+                              </div>
 
                               <button
                                 type="button"
@@ -379,12 +348,6 @@ const PendingDelete = () => {
                                   update.setPostId(item.id);
                                   update.open();
                                 }}
-                                disabled={
-                                  loading ||
-                                  loadingMore ||
-                                  disabled ||
-                                  disableBTN
-                                }
                               >
                                 <div className="text-4xl">
                                   <FaCommentAlt />
@@ -417,4 +380,4 @@ const PendingDelete = () => {
   );
 };
 
-export default PendingDelete;
+export default ReportedPosts;

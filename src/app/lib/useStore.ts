@@ -250,3 +250,27 @@ export const useMultipleSelect = create<MultipleSelect>((set, get) => ({
     set(() => ({ isOpen: false }));
   },
 }));
+
+//------------------------- Categorize
+
+interface Categorize {
+  setPostId: (data: any) => void;
+  postId: String;
+  isOpen: Boolean;
+  open: () => void;
+  close: () => void;
+}
+
+export const useCategorize = create<Categorize>((set) => ({
+  postId: "",
+  isOpen: false,
+  setPostId: (data: any) => {
+    set(() => ({ postId: data }));
+  },
+  open: () => {
+    set(() => ({ isOpen: true }));
+  },
+  close: () => {
+    set(() => ({ isOpen: false }));
+  },
+}));

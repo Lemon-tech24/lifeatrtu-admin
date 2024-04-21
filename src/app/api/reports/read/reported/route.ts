@@ -14,17 +14,8 @@ export async function POST(request: NextRequest) {
         skip: skip,
         take: take,
         where: {
-          AND: [
-            {
-              reason: { not: null },
-            },
-            {
-              reported: false,
-            },
-            {
-              pending: false,
-            },
-          ],
+          pending: false,
+          reported: true,
           user: {
             is: {
               blacklists: {
@@ -46,7 +37,6 @@ export async function POST(request: NextRequest) {
               },
             },
           },
-
           reports: {
             some: {
               disregard: false,
@@ -56,7 +46,7 @@ export async function POST(request: NextRequest) {
         include: {
           _count: {
             select: {
-              reports: {},
+              reports: true,
             },
           },
 
@@ -78,17 +68,7 @@ export async function POST(request: NextRequest) {
       });
 
       if (posts) {
-        const updatedPosts = posts.filter((post) => {
-          return (
-            post._count.reports > 0 &&
-            post._count.reports < 20 &&
-            !["violence", "suicidal or self injury", "harassment"].includes(
-              post.reason as string,
-            )
-          );
-        });
-
-        return NextResponse.json(updatedPosts);
+        return NextResponse.json(posts);
       }
     } else
       return NextResponse.json({ message: "UNAUTHORIZED" }, { status: 401 });

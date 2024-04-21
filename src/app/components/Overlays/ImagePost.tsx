@@ -21,7 +21,7 @@ const ImagePost = () => {
       <img
         src={image.src}
         alt="Image"
-        className="border border-black border-solid"
+        className="border border-black border-solid w-full h-full object-contain"
       />
     </div>
   );

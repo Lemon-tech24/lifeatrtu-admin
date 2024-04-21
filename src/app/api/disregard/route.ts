@@ -24,6 +24,8 @@ export async function POST(request: NextRequest) {
         },
         data: {
           pending: false,
+          reported: false,
+          reason: "",
         },
       });
 

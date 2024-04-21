@@ -12,6 +12,20 @@ export async function POST(request: NextRequest) {
     if (session) {
       const reports = await prisma.post.findMany({
         where: {
+          AND: [
+            {
+              reason: {
+                in: ["violence", "harassment", "suicidal or self injury"],
+              },
+            },
+            {
+              reason: {
+                not: {
+                  equals: null,
+                },
+              },
+            },
+          ],
           reports: {
             some: {
               AND: [
@@ -21,16 +35,9 @@ export async function POST(request: NextRequest) {
                     lte: end,
                   },
                 },
-                {
-                  reasons: {
-                    hasSome: [
-                      "violence",
-                      "suicidal or self injury",
-                      "harassment",
-                    ],
-                  },
-                },
               ],
+
+              disregard: false,
             },
           },
         },
@@ -40,10 +47,6 @@ export async function POST(request: NextRequest) {
               createdAt: {
                 gte: start,
                 lte: end,
-              },
-
-              reasons: {
-                hasSome: ["violence", "suicidal or self injury", "harassment"],
               },
             },
           },
@@ -57,6 +60,18 @@ export async function POST(request: NextRequest) {
 
       const reportsLow = await prisma.post.findMany({
         where: {
+          AND: [
+            {
+              reason: {
+                notIn: ["violence", "harassment", "suicidal or self injury"],
+              },
+            },
+            {
+              NOT: {
+                reason: "",
+              },
+            },
+          ],
           reports: {
             some: {
               AND: [
@@ -66,18 +81,9 @@ export async function POST(request: NextRequest) {
                     lte: end,
                   },
                 },
-                {
-                  NOT: {
-                    reasons: {
-                      hasSome: [
-                        "violence",
-                        "suicidal or self injury",
-                        "harassment",
-                      ],
-                    },
-                  },
-                },
               ],
+
+              disregard: false,
             },
           },
         },
@@ -87,15 +93,6 @@ export async function POST(request: NextRequest) {
               createdAt: {
                 gte: start,
                 lte: end,
-              },
-              NOT: {
-                reasons: {
-                  hasSome: [
-                    "violence",
-                    "suicidal or self injury",
-                    "harassment",
-                  ],
-                },
               },
             },
           },

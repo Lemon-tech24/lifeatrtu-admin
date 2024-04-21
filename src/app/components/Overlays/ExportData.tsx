@@ -108,10 +108,10 @@ const ExportData = () => {
 
     try {
       if (startDate && endDate) {
-        const startUTC8 = moment(startDate).utcOffset("+08:00").toISOString();
-        const endUTC8 = moment(endDate).utcOffset("+08:00").toISOString();
+        const startUTC8 = moment(startDate).toISOString();
+        const endUTC8 = moment(endDate).toISOString();
 
-        const response = await axios.post("/api/reports/read", {
+        const response = await axios.post("/api/reports/read/bar", {
           start: startUTC8,
           end: endUTC8,
         });
@@ -475,6 +475,7 @@ const ExportData = () => {
         )}
       </Document>
     );
+
   return (
     hydrate && (
       <div className="fixed top-0 left-0 w-full h-screen bg-slate-500/80 z-50 flex items-center justify-center">

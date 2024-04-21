@@ -14,7 +14,17 @@ export async function POST(request: NextRequest) {
         skip: skip,
         take: take,
         where: {
-          pending: false,
+          AND: [
+            {
+              reason: { not: null },
+            },
+            {
+              reported: false,
+            },
+            {
+              pending: false,
+            },
+          ],
           user: {
             is: {
               blacklists: {
@@ -57,11 +67,6 @@ export async function POST(request: NextRequest) {
               email: true,
             },
           },
-          reports: {
-            select: {
-              reasons: true,
-            },
-          },
         },
 
         orderBy: {
@@ -71,17 +76,18 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      const updated = posts.filter(
-        (post) =>
-          (post._count.reports > 0 && post._count.reports > 20) ||
-          post.reports.some((report) =>
-            ["violence", "suicidal or self injury", "harassment"].some(
-              (reason) => report.reasons.includes(reason),
-            ),
-          ),
-      );
+      if (posts) {
+        const updatedPosts = posts.filter((post) => {
+          return (
+            (post._count.reports > 0 && post._count.reports > 20) ||
+            ["violence", "suicidal or self injury", "harassment"].includes(
+              post.reason as string,
+            )
+          );
+        });
 
-      return NextResponse.json(updated);
+        return NextResponse.json(updatedPosts);
+      }
     } else
       return NextResponse.json({ message: "UNAUTHORIZED" }, { status: 401 });
   } catch (err) {

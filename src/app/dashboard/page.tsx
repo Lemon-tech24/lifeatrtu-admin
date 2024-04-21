@@ -20,6 +20,7 @@ import {
   isOpenReport,
   isOpenSettings,
   isOpenUpdates,
+  useCategorize,
   useMultipleSelect,
 } from "../lib/useStore";
 import Settings from "../components/Overlays/Settings";
@@ -28,12 +29,13 @@ import AddModerators from "../components/Overlays/AddModerators";
 import ExportData from "../components/Overlays/ExportData";
 import Updates from "../components/Overlays/Updates";
 import ImagePost from "../components/Overlays/ImagePost";
-import Reports from "../components/Overlays/Reports";
 import PendingDelete from "../components/PendingDelete";
 import HighRiskReports from "../components/HighRiskReports";
 import BanAccount from "../components/BanAccount";
 import BanUsers from "../components/Overlays/BanUsers";
 import { CgClose } from "react-icons/cg";
+import ReportedPosts from "../components/ReportedPosts";
+import Archive from "../components/Archive";
 
 const Page = () => {
   const router = useRouter();
@@ -55,9 +57,11 @@ const Page = () => {
       ? ["High Risk Report", "Low Risk Report"]
       : [
           "Dashboard",
+          "Reported Posts",
           "High Risk Report",
           "Low Risk Report",
           "Pending to Delete",
+          "Archive",
         ];
 
   const renderComponent = () => {
@@ -73,6 +77,12 @@ const Page = () => {
 
       case "pending to delete":
         return <PendingDelete />;
+
+      case "reported posts":
+        return <ReportedPosts />;
+
+      case "archive":
+        return <Archive />;
     }
   };
 
@@ -93,6 +103,7 @@ const Page = () => {
   const report = isOpenReport();
   const ban = isOpenBanAccount();
   const banUsers = isOpenBanUsers();
+  const categorize = useCategorize();
 
   const selection = useMultipleSelect();
 
@@ -116,7 +127,6 @@ const Page = () => {
       {exportData.value && <ExportData />}
       {updates.value && <Updates />}
       {image.value && <ImagePost />}
-      {report.value && <Reports />}
       {ban.value && <BanAccount />}
       {banUsers.value && <BanUsers />}
 
@@ -206,7 +216,7 @@ const Page = () => {
             </div>
           </div>
 
-          <div className="flex flex-col gap-16">
+          <div className="flex flex-col gap-12">
             {buttons.map((item: any, key: any) => {
               return (
                 <button
@@ -261,7 +271,9 @@ const Page = () => {
             backgroundImage:
               selectedButton === "low risk report" ||
               selectedButton === "high risk report" ||
-              selectedButton === "pending to delete"
+              selectedButton === "pending to delete" ||
+              selectedButton === "archive" ||
+              selectedButton === "reported posts"
                 ? `url("/bg.png")`
                 : ``,
             backgroundSize: "cover",

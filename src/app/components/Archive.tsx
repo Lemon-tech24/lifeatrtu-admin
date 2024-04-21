@@ -1,14 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
-"use client";
-import axios from "axios";
-import React, { useEffect, useRef, useState } from "react";
 import { useInfiniteScroll } from "ahooks";
+import axios from "axios";
 import { useSession } from "next-auth/react";
-
-import Skeleton from "@/app/components/UI/Skeleton";
-import { CgProfile } from "react-icons/cg";
-import moment from "moment";
-import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
+import React, { useState, useRef, useEffect } from "react";
 import {
   DisregardReport,
   isMarkAsDone,
@@ -16,29 +10,29 @@ import {
   isOpenImage,
   isOpenReport,
   isOpenUpdates,
+  useCategorize,
   useMultipleSelect,
 } from "../lib/useStore";
-import { IoIosWarning } from "react-icons/io";
-import { FaCommentAlt } from "react-icons/fa";
-import { BsIncognito } from "react-icons/bs";
+import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import toast from "react-hot-toast";
-import MultipleSelect from "./MultipleSelect";
+import { FaCommentAlt } from "react-icons/fa";
+import Skeleton from "./UI/Skeleton";
+import { IoIosWarning } from "react-icons/io";
+import { BsIncognito } from "react-icons/bs";
+import { CgProfile } from "react-icons/cg";
+import moment from "moment";
+import Categorize from "./Overlays/Categorize";
 
-const HighRiskReports = () => {
-  const { data: session } = useSession();
+const Archive = () => {
   const [select, setSelect] = useState<string>("most");
-  const [disabled, setDisabled] = useState<boolean>(false);
-  const [disableBTN, setDisabledBTN] = useState<boolean>(false);
 
+  const { data: session } = useSession();
   const reference = useRef<HTMLDivElement>(null);
   const controllerRef = useRef(new AbortController());
 
   const image = isOpenImage();
   const update = isOpenUpdates();
-  const markDone = isMarkAsDone();
   const ban = isOpenBanAccount();
-  const disregard = DisregardReport();
-  const selection = useMultipleSelect();
 
   useEffect(() => {
     if (controllerRef.current) {
@@ -50,7 +44,7 @@ const HighRiskReports = () => {
 
   const getPosts = async (skip: any, take: number) => {
     try {
-      const response = await axios.post("/api/reports/read/high", {
+      const response = await axios.post("/api/archive", {
         skip: skip,
         take: take,
         order: select,
@@ -80,85 +74,6 @@ const HighRiskReports = () => {
       reloadDeps: [session, select, ban.value],
     });
 
-  const MarkDelete = (postId: string) => {
-    const loadingId = toast.loading("Deleting...");
-    const { signal } = controllerRef.current;
-
-    if (disabled) {
-      toast.error("Please Wait");
-    }
-
-    setDisabledBTN(true);
-
-    setTimeout(() => {
-      setDisabled(true);
-      axios
-        .post("/api/delete", { postId: postId }, { signal: signal })
-        .then((response) => {
-          const data = response.data;
-
-          if (data.ok) {
-            toast.success("Successfully Deleted");
-            reload();
-          } else {
-            toast.error("Failed To Delete");
-            throw new Error();
-          }
-        })
-        .catch((err) => {
-          if (err.name === "CanceledError") {
-            toast.error("Canceled");
-          }
-
-          toast.error("Error Occurred");
-        })
-        .finally(() => {
-          toast.dismiss(loadingId);
-          setDisabled(false);
-          setDisabledBTN(false);
-        });
-    }, 500);
-  };
-
-  const Disregard = (postId: string) => {
-    const loadingId = toast.loading("Processing...");
-    const { signal } = controllerRef.current;
-
-    if (disabled) {
-      toast.error("Please Wait");
-    }
-
-    setDisabledBTN(true);
-
-    setTimeout(() => {
-      setDisabled(true);
-      axios
-        .post("/api/disregard", { postId: postId }, { signal: signal })
-        .then((response) => {
-          const data = response.data;
-
-          if (data.ok) {
-            toast.success("Disregarded");
-            reload();
-          } else {
-            toast.error("Error Disregarding Post");
-          }
-        })
-        .catch((err) => {
-          if (err.name === "CanceledError") {
-            toast.error("Canceled");
-          }
-
-          toast.error("Error Occurred");
-        })
-        .finally(() => {
-          toast.dismiss(loadingId);
-          setDisabled(false);
-          setDisabledBTN(false);
-        });
-    }, 500);
-  };
-
   const sortPostsByReports = (a: any, b: any) => {
     if (!a.reports || !b.reports) return 0;
     if (!a.reports.length || !b.reports.length) return 0;
@@ -170,60 +85,9 @@ const HighRiskReports = () => {
     }
   };
 
-  const checkboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, checked } = e.target;
-    if (checked) {
-      selection.setList([...selection.list, value]);
-    } else {
-      selection.setList(selection.list.filter((id) => id !== value));
-    }
-  };
-
-  const requestDelete = (postId: string) => {
-    const loadingId = toast.loading("Requesting to Delete...");
-    const { signal } = controllerRef.current;
-    if (disabled) {
-      toast.error("Please Wait");
-    }
-
-    setDisabledBTN(true);
-
-    setTimeout(() => {
-      setDisabled(true);
-      axios
-        .post("/api/request/delete", { postId: postId }, { signal: signal })
-        .then((response) => {
-          const data = response.data;
-
-          if (data.ok) {
-            toast.success("Deletion Request Sent");
-            reload();
-          } else {
-            toast.error("Failed to Request");
-          }
-        })
-        .catch((err) => {
-          if (err.name === "CanceledError") {
-            toast.error("Canceled");
-          }
-          toast.error("Error Occured");
-        })
-        .finally(() => {
-          toast.dismiss(loadingId);
-          setDisabled(false);
-          setDisabledBTN(false);
-        });
-    }, 500);
-  };
   return (
     <>
       <div className="w-full flex items-center justify-end p-6 gap-2 sm:pr-2">
-        <MultipleSelect
-          reload={reload}
-          loading={loading}
-          loadingMore={loadingMore}
-          tab={"high"}
-        />
         <select
           className="rounded-xl px-2 text-xl border border-black border-solid shadow-lg md:text-base sm:text-sm"
           onChange={(e) => setSelect(e.target.value)}
@@ -258,71 +122,21 @@ const HighRiskReports = () => {
                           >
                             {/* ----------------------------------------------------------------- */}
                             <div className="flex items-center justify-end">
-                              {session?.user.role === "mod" ? (
-                                !item.pending ? (
-                                  <button
-                                    className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                                    onClick={() => requestDelete(item.id)}
-                                    disabled={disabled || disableBTN}
-                                  >
-                                    Request to Delete
-                                  </button>
-                                ) : (
-                                  <></>
-                                )
-                              ) : (
+                              {!loading && (
                                 <div className="flex items-center gap-2">
-                                  {selection.isOpen ? (
-                                    <input
-                                      type="checkbox"
-                                      className="w-4 h-4 accent-black"
-                                      checked={selection.list.includes(item.id)}
-                                      value={item.id}
-                                      onChange={checkboxChange}
-                                      disabled={disabled || disableBTN}
-                                    />
-                                  ) : (
-                                    <>
-                                      <button
-                                        type="button"
-                                        className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                                        onClick={() => {
-                                          markDone.setPostId(item.id);
-                                          if (item.id === markDone.postId) {
-                                            MarkDelete(markDone.postId);
-                                          }
-                                        }}
-                                        disabled={disabled || disableBTN}
-                                      >
-                                        Delete
-                                      </button>
-                                      <button
-                                        type="button"
-                                        className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                                        onClick={() => {
-                                          disregard.setPostId(item.id);
-                                          if (item.id === disregard.postId) {
-                                            Disregard(disregard.postId);
-                                          }
-                                        }}
-                                        disabled={disabled || disableBTN}
-                                      >
-                                        Disregard
-                                      </button>
-                                      <button
-                                        type="button"
-                                        className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                                        onClick={() => {
-                                          ban.setUserId(item.user.id);
-                                          ban.setEmail(item.user.email);
-                                          ban.open();
-                                        }}
-                                        disabled={disabled || disableBTN}
-                                      >
-                                        Ban
-                                      </button>
-                                    </>
-                                  )}
+                                  <>
+                                    <button
+                                      type="button"
+                                      className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
+                                      onClick={() => {
+                                        ban.setUserId(item.user.id);
+                                        ban.setEmail(item.user.email);
+                                        ban.open();
+                                      }}
+                                    >
+                                      Ban
+                                    </button>
+                                  </>
                                 </div>
                               )}
                             </div>
@@ -380,7 +194,6 @@ const HighRiskReports = () => {
                                 <img
                                   src={item.image}
                                   alt="image content"
-                                  className="cursor-pointer"
                                   onClick={() => {
                                     image.source(item.image);
                                     image.open();
@@ -401,10 +214,10 @@ const HighRiskReports = () => {
                                   <IoIosWarning />
                                 </div>
                                 <div
-                                  className="text-base font-semibold -mb-3"
+                                  className="text-sm font-semibold -mb-3"
                                   style={{ color: "#CA0C0C" }}
                                 >
-                                  {item._count.reports} REPORTS
+                                  {item._count.reports} Previous Reports
                                 </div>
                               </div>
 
@@ -447,4 +260,4 @@ const HighRiskReports = () => {
   );
 };
 
-export default HighRiskReports;
+export default Archive;

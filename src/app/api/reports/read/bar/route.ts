@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
             )
           ) {
             acc[reportDate].highRisk++;
-          } else if (post.reason !== "" && post.reason !== null) {
+          } else {
             acc[reportDate].lowRisk++;
           }
           return acc;

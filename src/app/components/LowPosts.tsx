@@ -198,10 +198,6 @@ const LowPosts = ({
               .slice()
               .sort(sortPostsByReports)
               .map((item: any, key: any) => {
-                const totalReports = item.reports.reduce(
-                  (acc: number, report: any) => acc + report.reasons.length,
-                  0
-                );
                 return (
                   item && (
                     <div
@@ -323,28 +319,19 @@ const LowPosts = ({
                         {item.content}
                       </div>
                       {/* ----------------------------------------------------------------- */}
-                      {item.image && (
-                        <div>
-                          <img
-                            src={item.image}
-                            alt="Post Image"
-                            className="cursor-pointer"
-                            onClick={() => {
-                              image.source(item.image);
-                              image.open();
-                            }}
-                          />
-                        </div>
+
+                      {item.image && item.image.startsWith("data:image/") && (
+                        <img src={item.image} alt="image content" />
+                      )}
+
+                      {item.image && item.image.startsWith("data:video/") && (
+                        <video controls>
+                          <source src={item.image} />
+                        </video>
                       )}
                       {/* ----------------------------------------------------------------- */}
                       <div className="flex w-full items-center justify-center gap-10 mt-8">
-                        <div
-                          className="flex items-center justify-center gap-1 cursor-pointer"
-                          onClick={() => {
-                            report.setData(item);
-                            report.open();
-                          }}
-                        >
+                        <div className="flex items-center justify-center gap-1">
                           <div className="text-4xl">
                             <IoIosWarning />
                           </div>
@@ -352,7 +339,7 @@ const LowPosts = ({
                             className="text-base font-semibold -mb-3"
                             style={{ color: "#CA0C0C" }}
                           >
-                            {totalReports} REPORTS
+                            {item._count.reports} REPORTS
                           </div>
                         </div>
 

@@ -5,22 +5,30 @@ import { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
-  const { list } = await request.json();
-  try {
-    const session = await getServerSession(authOptions);
+  const { postId, category } = await request.json();
 
+  const session = await getServerSession(authOptions);
+
+  try {
     if (session) {
-      const deletePost = await prisma.post.deleteMany({
+      const categorizedPost = await prisma.post.update({
         where: {
-          id: { in: list },
+          id: postId,
+        },
+        data: {
+          reason: category,
+          reported: false,
+          pending: false,
         },
       });
 
-      if (deletePost) {
+      if (categorizedPost) {
         return NextResponse.json({ ok: true });
-      } else return NextResponse.json({ ok: false });
-    } else
+      }
+      return NextResponse.json({ ok: false });
+    } else {
       return NextResponse.json({ message: "UNAUTHORIZED" }, { status: 401 });
+    }
   } catch (err) {
     throw new Error("Error");
   }

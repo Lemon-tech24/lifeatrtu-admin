@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
         take: take,
 
         where: {
-          pending: true,
+          AND: [{ reported: false }, { pending: true }],
           user: {
             is: {
               blacklists: {
@@ -54,11 +54,7 @@ export async function POST(request: NextRequest) {
               email: true,
             },
           },
-          reports: {
-            select: {
-              reasons: true,
-            },
-          },
+
           _count: {
             select: {
               reports: true,
