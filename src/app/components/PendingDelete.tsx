@@ -244,23 +244,6 @@ const PendingDelete = () => {
                                       disableBTN
                                     }
                                     onClick={() => {
-                                      categorize.setPostId(item.id);
-                                      categorize.open();
-                                    }}
-                                  >
-                                    Categorize
-                                  </button>
-
-                                  <button
-                                    type="button"
-                                    className="text-base px-2 rounded-xl bg-slate-400/80 border border-solid border-black"
-                                    disabled={
-                                      loading ||
-                                      loadingMore ||
-                                      disabled ||
-                                      disableBTN
-                                    }
-                                    onClick={() => {
                                       approve.setPostId(item.id);
 
                                       if (item.id === approve.postId) {
@@ -367,8 +350,7 @@ const PendingDelete = () => {
                                   className="text-base font-semibold -mb-3"
                                   style={{ color: "#CA0C0C" }}
                                 >
-                                  {item._count.reports}
-                                  REPORTS
+                                  {item._count.reports} REPORTS
                                 </div>
                               </button>
 

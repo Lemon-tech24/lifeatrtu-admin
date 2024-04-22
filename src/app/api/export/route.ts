@@ -67,8 +67,10 @@ export async function POST(request: NextRequest) {
               },
             },
             {
-              NOT: {
-                reason: "",
+              reason: {
+                not: {
+                  equals: null,
+                },
               },
             },
           ],
